@@ -2,10 +2,11 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <stdint.h>
 #include "cpu.h"
 #include "bus.h"
 
-void read_cpu_program(std::vector<char>&program_stream)
+void read_cpu_program(std::vector<uint8_t>&program_data)
 {
     std::string test_path = "C:/Users/Nikita/Desktop/gameboy/tests/cpu/Blarggs/01-special.gb";
     std::ifstream file(test_path);
@@ -14,8 +15,8 @@ void read_cpu_program(std::vector<char>&program_stream)
         file.seekg(0, std::ifstream::end);
         std::streamsize program_size = file.tellg();
         file.seekg(0, std::ifstream::beg);
-        program_stream = std::vector<char>(program_size);
-        file.read(program_stream.data(), program_size);
+        program_data = std::vector<uint8_t>(program_size);
+        file.read((char*)program_data.data(), program_size);
         file.close();
     }
     else
@@ -26,9 +27,9 @@ void read_cpu_program(std::vector<char>&program_stream)
 
 int main()
 {
-    std::vector<char> program_stream;
-    read_cpu_program(program_stream);
-    BUS bus; 
+    std::vector<uint8_t> program_data;
+    read_cpu_program(program_data);
+    BUS bus(program_data); 
     CPU gameboy_cpu(&bus);
     gameboy_cpu.start_emulation();
 	return 0;
