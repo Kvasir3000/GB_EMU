@@ -8,7 +8,9 @@ set(CMAKE_CXX_STADARD_REQUIRED True)
 
 set( SOURCES
 	src/main.cpp
-	src/cpu.cpp
+	src/cpu/cpu.cpp
+	src/cpu/opcodes.cpp
+	src/bus.cpp
 )
 add_executable(GB_EMU ${SOURCES})
 include_directories(inc)

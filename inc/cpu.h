@@ -1,6 +1,7 @@
 #if! defined CPU_H
 #define CPU_H
 #include <stdint.h>
+#include "bus.h"
 
 enum OPCODE
 {
@@ -17,15 +18,10 @@ enum OPCODE
 class CPU
 {
 public: 
-	CPU();
+	CPU(BUS* bus);
 	void start_emulation();
-private:
-	/*
-	* For now it stores the memory of the whole system, as I am just implementing CPU at the moment
-	* Later on I am planning to add a BUS system implementation with the proper memory mapping
-	*/
-	unsigned char* ram;
 
+private:
 
 	/* 
 	* 8-bit  registers, these can be combined to 16 bits in following configurations:
@@ -42,6 +38,8 @@ private:
 
 	uint16_t PC;
 	uint16_t SP;
+
+	BUS* bus;
 
 	struct INSTRUCTION
 	{

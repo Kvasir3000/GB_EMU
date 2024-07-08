@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include "cpu.h"
+#include "bus.h"
 
 void read_cpu_program(std::vector<char>&program_stream)
 {
@@ -27,7 +28,8 @@ int main()
 {
     std::vector<char> program_stream;
     read_cpu_program(program_stream);
-    CPU gameboy_cpu;
+    BUS bus; 
+    CPU gameboy_cpu(&bus);
     gameboy_cpu.start_emulation();
 	return 0;
 }
