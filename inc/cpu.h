@@ -88,14 +88,19 @@ private:
 	* 8-bit  registers, these can be combined to 16 bits in following configurations:
 	* AF, BC, DE, HL
 	*/
-	uint8_t A;
-	uint8_t B;
-	uint8_t C;
-	uint8_t D;
-	uint8_t E;
-	uint8_t F;
-	uint8_t H;
-	uint8_t L;
+	struct REGISTER
+	{
+		uint8_t register_value;
+		std::string register_name;
+	};
+	REGISTER A;
+	REGISTER B;
+	REGISTER C;
+	REGISTER D;
+	REGISTER E;
+	REGISTER F;
+	REGISTER H;
+	REGISTER L;
 
 	uint16_t PC;
 	uint16_t SP;
@@ -105,15 +110,13 @@ private:
 	struct INSTRUCTION
 	{
 		OPCODE opcode;
-		std::string opcode_str;
+		std::string opcode_name;
 		uint8_t number_of_cycles;
 		
-		uint8_t* parameter_one;
-		uint8_t* parameter_two;
-		uint8_t* parameter_three; // combined with param_one to form  16 bit register
-		uint8_t* parameter_four; // combined with param_two to form 16 bit register
-
-		uint8_t instruction_length;
+		REGISTER* parameter_one;
+		REGISTER* parameter_two;
+		REGISTER* parameter_three; // combined with param_one to form  16 bit register
+		REGISTER* parameter_four; // combined with param_two to form 16 bit register
 
 		void (CPU::* function_ptr)();
 	};
@@ -132,7 +135,10 @@ private:
 	void decode_instruction();
 
 
-	void ld_nn_to_register();
+	void ld_r_n();
 	void ld_r1_r2();
+	void ld_r_hl();
+	void ld_hl_r();
+	void ld_hl_n();
 };
 #endif
