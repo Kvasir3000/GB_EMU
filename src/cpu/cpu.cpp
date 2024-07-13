@@ -1,5 +1,4 @@
 #include "cpu.h"
-#include <iomanip>
 
 CPU::CPU(BUS* bus)
 {
@@ -25,6 +24,8 @@ void CPU::start_emulation()
 	{
 		execute_instruction();
 		PC++;	
+		if (PC == 0x105)
+			return;
 	}
 }
 

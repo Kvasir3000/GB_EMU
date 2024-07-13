@@ -3,7 +3,9 @@
 #include <stdint.h>
 #include <string>
 #include <fstream>
+#include <iomanip>
 #include "bus.h"
+#include "utils/utils.h"
 
 enum OPCODE
 {
@@ -30,6 +32,7 @@ enum OPCODE
 	LD_A_BC = 0x0A,
 	LD_A_DE = 0x1A,
 	LD_A_HL = 0x7E,
+	LDD_A_HL = 0x3A,
 	LD_A_nn = 0xFA,
 
 	LD_B_A = 0x47,
@@ -42,6 +45,7 @@ enum OPCODE
 	LD_B_HL = 0x46,
 
 	LD_C_A = 0x4F,
+	LD_C_A_IO = 0xE2,
 	LD_C_B = 0x48,
 	LD_C_C = 0x49,
 	LD_C_D = 0x4A,
@@ -96,7 +100,12 @@ enum OPCODE
 	
 	LD_BC_A = 0x02,
 	LD_DE_A = 0x12,
-	LD_nn_A = 0xEA
+	LD_nn_A = 0xEA,
+
+	DEC_BC = 0x0B,
+	DEC_DE = 0x1B,
+	DEC_HL = 0x2B,
+	DEC_SP = 0x3B
 };
 
 class CPU
@@ -132,7 +141,7 @@ private:
 
 	struct INSTRUCTION
 	{
-		OPCODE opcode;
+		//OPCODE opcode;
 		std::string opcode_name;
 		uint8_t number_of_cycles;
 		
@@ -163,10 +172,14 @@ private:
 	void ld_r_nn();
 	void ld_r1_r2();
 	void ld_r1_r2r4();
+	void ldd_r1_r2r4();
 	void ld_r1r3_r2();
 	void ld_r1r3_n();
 	void ld_nn_r();
 	void ld_a_c_io();
+	void ld_c_a_io();
 	
+	void dec_r1r3();
+	void dec_sp();
 };
 #endif

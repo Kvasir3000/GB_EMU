@@ -11,6 +11,7 @@ set( SOURCES
 	src/cpu/cpu.cpp
 	src/cpu/opcodes.cpp
 	src/bus.cpp
+	src/utils/utils.cpp
 )
 add_executable(GB_EMU ${SOURCES})
 include_directories(inc)
