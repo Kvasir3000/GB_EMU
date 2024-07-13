@@ -25,7 +25,6 @@ void CPU::start_emulation()
 	{
 		execute_instruction();
 		PC++;	
-		return;
 	}
 }
 
@@ -33,6 +32,7 @@ void CPU::execute_instruction()
 {
 	fetch_opcode();
 	decode_instruction();
+	execute();
 }
 
 void CPU::fetch_opcode()
@@ -47,5 +47,9 @@ void CPU::decode_instruction()
 	log_file << "PC:0x" << std::hex << PC << "-> INST:0x" << std::setw(2) << std::setfill('0') << 
 		         (uint16_t)current_opcode << "-> " << current_instruction.opcode_name;
 #endif
-	(this->*(current_instruction.function_ptr))();	
+}
+
+void CPU::execute()
+{
+	(this->*(current_instruction.function_ptr))();
 }
