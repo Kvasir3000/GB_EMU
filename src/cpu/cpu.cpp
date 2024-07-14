@@ -22,7 +22,7 @@ void CPU::start_emulation()
 	while (true)
 	{
 		tick();
-		PC++;	
+		PC++;
 	}
 }
 

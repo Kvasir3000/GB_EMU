@@ -34,7 +34,8 @@ enum OPCODE
 	LD_A_HL = 0x7E,
 	LDD_A_HL = 0x3A,
 	LDI_A_HL = 0x2A,
-	LD_A_nn = 0xFA,
+	LD_A_nn = 0xFA, 
+	LDH_A_n = 0xF0,
 
 	LD_B_A = 0x47,
 	LD_B_B = 0x40,
@@ -104,6 +105,7 @@ enum OPCODE
 	LD_BC_A = 0x02,
 	LD_DE_A = 0x12,
 	LD_nn_A = 0xEA,
+	LDH_n_A = 0xE0,
 
 	INC_BC = 0x03,
 	INC_DE = 0x13, 
@@ -186,6 +188,7 @@ private:
 
 	void ld_r1_n();
 	void ld_r1_nn();
+	void ldh_r1_n();
 	void ld_r1_r2();
 	void ld_r1_r2r4();
 	void ldd_r1_r2r4();
@@ -195,6 +198,7 @@ private:
 	void ldi_r1r3_r2();
 	void ld_r1r3_n();
 	void ld_nn_r1();
+	void ldh_n_r1();
 	void ld_a_c_io();
 	void ld_c_a_io();
 	

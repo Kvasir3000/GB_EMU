@@ -24,6 +24,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[LDD_A_HL] =  { "LDD_A_HL",  8,  &A,      &H,      nullptr, &L,      &CPU::ldd_r1_r2r4 };
 	instruction_table_map[LDI_A_HL] =  { "LDI_A_HL",  8,  &A,      &H,      nullptr, &L,      &CPU::ldi_r1_r2r4 };
 	instruction_table_map[LD_A_nn] =   { "LD_A_nn",   16, &A,      nullptr, nullptr, nullptr, &CPU::ld_r1_nn };
+	instruction_table_map[LDH_A_n] =   { "LDH_A_n",   12, &A,      nullptr, nullptr, nullptr, &CPU::ldh_r1_n };
 	instruction_table_map[LD_B_A] =    { "LD_B_A",    4,  &B,      &A,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_B_B] =    { "LD_B_B",    4,  &B,      &B,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_B_C] =    { "LD_B_C",    4,  &B,      &C,      nullptr, nullptr, &CPU::ld_r1_r2 };
@@ -62,7 +63,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[LD_H_C] =    { "LD_H_C",    4,  &H,      &C,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_H_D] =    { "LD_H_D",    4,  &H,      &D,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_H_E] =    { "LD_H_E",    4,  &H,      &E,      nullptr, nullptr, &CPU::ld_r1_r2 };
-	instruction_table_map[LD_H_H] =    { "LD_H_H",    4 ,  &H,      &H,      nullptr, nullptr, &CPU::ld_r1_r2 };
+	instruction_table_map[LD_H_H] =    { "LD_H_H",    4 , &H,      &H,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_H_L] =    { "LD_H_L",    4,  &H,      &L,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_H_HL]  =  { "LD_H_HL",   8,  &H,      &H,      nullptr, &L,      &CPU::ld_r1_r2r4 };
 	instruction_table_map[LD_L_A] =    { "LD_L_A",    4,  &L,      &A,      nullptr, nullptr, &CPU::ld_r1_r2 };
@@ -84,6 +85,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[LD_BC_A] =   { "LD_BC_A",   8,  &B,      &A,      &C,      nullptr, &CPU::ld_r1r3_r2 };
 	instruction_table_map[LD_DE_A] =   { "LD_DE_A",   8,  &D,      &A,      &E,      nullptr, &CPU::ld_r1r3_r2 };
 	instruction_table_map[LD_nn_A] =   { "LD_nn_A",   16, &A,      nullptr, nullptr, nullptr, &CPU::ld_nn_r1 };
+	instruction_table_map[LDH_n_A] =   { "LDH_n_A",   12, &A,      nullptr, nullptr, nullptr, &CPU::ldh_n_r1 }; 
 	instruction_table_map[INC_BC] =    { "INC_BC",    8,  &B,      nullptr, &C,      nullptr, &CPU::inc_r1r3 };
 	instruction_table_map[INC_DE] =    { "INC_DE",    8,  &D,      nullptr, &E,      nullptr, &CPU::inc_r1r3 };
 	instruction_table_map[INC_HL] =    { "INC_HL",    8,  &H,      nullptr, &L,      nullptr, &CPU::inc_r1r3 };
@@ -115,6 +117,20 @@ void CPU::ld_r1_nn()
 	log_file << ": " << current_instruction.parameter_one->register_name << "= ADDR[0x" << memory_addr << 
 		                "] = 0x" << (uint16_t)current_instruction.parameter_one->register_value << "\n";
 #endif 
+}
+
+// Load data from memory address $FF00 + n to r1 register. $FF00 - $FF7F IO ports range addresses
+void CPU::ldh_r1_n()
+{
+	uint8_t  memory_offset = bus->read_from_memory(++PC);
+	uint16_t memory_address = 0xFF00 + memory_offset;
+	current_instruction.parameter_one->register_value = bus->read_from_memory(memory_address);
+
+#if defined DEBUG
+	log_file << ": " << current_instruction.parameter_one->register_name << " = ADDR[0xFF00 + 0x" <<
+		        (uint16_t)memory_offset << "] = ADDR[0x" << memory_address << "] = 0x" <<
+		        (uint16_t)current_instruction.parameter_one->register_value << "\n";
+#endif
 }
 
 // Load data from r2 to r1 register
@@ -238,6 +254,21 @@ void CPU::ld_nn_r1()
 
 #if defined DEBUG
 	log_file << ": ADDR[0x" << memory_addr << "] = " << current_instruction.parameter_one->register_name <<
+		        " = 0x" << (uint16_t)data << "\n";
+#endif
+}
+
+// Load data from r1 register to memory address $FF00 + n. $FF00 - $FF7F IO ports range addresses
+void CPU::ldh_n_r1()
+{
+	uint8_t  address_offset = bus->read_from_memory(++PC);
+	uint16_t memory_address = 0xFF00 + address_offset;
+	uint8_t  data = current_instruction.parameter_one->register_value;
+	bus->write_to_memory(memory_address, data);
+
+#if defined DEBUG
+	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = ADDR[0x" <<
+		        memory_address << "] = " << current_instruction.parameter_one->register_name <<
 		        " = 0x" << (uint16_t)data << "\n";
 #endif
 }
