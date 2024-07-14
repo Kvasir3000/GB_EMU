@@ -9,7 +9,6 @@ CPU::CPU(BUS* bus)
 	C.register_name = "C";
 	D.register_name = "D";
 	E.register_name = "E";
-	F.register_name = "F";
 	H.register_name = "H";
 	L.register_name = "L";
 
@@ -22,14 +21,12 @@ void CPU::start_emulation()
 {
 	while (true)
 	{
-		execute_instruction();
+		tick();
 		PC++;	
-		if (PC == 0x105)
-			return;
 	}
 }
 
-void CPU::execute_instruction()
+void CPU::tick()
 {
 	fetch_opcode();
 	decode_instruction();
@@ -44,6 +41,7 @@ void CPU::fetch_opcode()
 void CPU::decode_instruction()
 {
 	current_instruction = instruction_table_map[current_opcode];
+
 #if defined DEBUG
 	log_file << "PC:0x" << std::hex << PC << "-> INST:0x" << std::setw(2) << std::setfill('0') << 
 		         (uint16_t)current_opcode << "-> " << current_instruction.opcode_name;

@@ -15,28 +15,29 @@ enum OPCODE
 	LD_B_n = 0x06,
 	LD_C_n = 0x0E,
 	LD_D_n = 0x16,
-	LD_E_n = 0x1E, 
+	LD_E_n = 0x1E,
 	LD_H_n = 0x26,
 	LD_L_n = 0x2E,
 
 	// LD r1, r2; LD n, A 
-	LD_A_A = 0x7F, 
+	LD_A_A = 0x7F,
 	// LD r1, r2
 	LD_A_B = 0x78,
 	LD_A_C = 0x79,
 	LD_A_C_IO = 0xF2,
 	LD_A_D = 0x7A,
-	LD_A_E = 0x7B, 
+	LD_A_E = 0x7B,
 	LD_A_H = 0x7C,
 	LD_A_L = 0x7D,
 	LD_A_BC = 0x0A,
 	LD_A_DE = 0x1A,
 	LD_A_HL = 0x7E,
 	LDD_A_HL = 0x3A,
+	LDI_A_HL = 0x2A,
 	LD_A_nn = 0xFA,
 
 	LD_B_A = 0x47,
-	LD_B_B = 0x40, 
+	LD_B_B = 0x40,
 	LD_B_C = 0x41,
 	LD_B_D = 0x42,
 	LD_B_E = 0x43,
@@ -72,7 +73,7 @@ enum OPCODE
 	LD_E_L = 0x5D,
 	LD_E_HL = 0x5E,
 
-	LD_H_A = 0x67, 
+	LD_H_A = 0x67,
 	LD_H_B = 0x60,
 	LD_H_C = 0x61,
 	LD_H_D = 0x62,
@@ -97,10 +98,17 @@ enum OPCODE
 	LD_HL_H = 0x74,
 	LD_HL_L = 0x75,
 	LD_HL_n = 0x36,
+	LDD_HL_A = 0x32,
+	LDI_HL_A = 0x22,
 	
 	LD_BC_A = 0x02,
 	LD_DE_A = 0x12,
 	LD_nn_A = 0xEA,
+
+	INC_BC = 0x03,
+	INC_DE = 0x13, 
+	INC_HL = 0x23,
+	INC_SP = 0x33, 
 
 	DEC_BC = 0x0B,
 	DEC_DE = 0x1B,
@@ -130,9 +138,17 @@ private:
 	REGISTER C;
 	REGISTER D;
 	REGISTER E;
-	REGISTER F;
 	REGISTER H;
 	REGISTER L;
+
+	struct FLAG_REGISTER
+	{
+		uint8_t Z : 1;
+		uint8_t N : 1;
+		uint8_t H : 1;
+		uint8_t C : 1;
+		uint8_t free_bits : 4;
+	} F;
 
 	uint16_t PC;
 	uint16_t SP;
@@ -162,23 +178,28 @@ private:
 #if defined DEBUG
 	std::ofstream log_file;
 #endif
-	void execute_instruction();
+	void tick();
 	void fetch_opcode();
 	void decode_instruction();
 	void execute();
 
 
-	void ld_r_n();
-	void ld_r_nn();
+	void ld_r1_n();
+	void ld_r1_nn();
 	void ld_r1_r2();
 	void ld_r1_r2r4();
 	void ldd_r1_r2r4();
+	void ldi_r1_r2r4();
 	void ld_r1r3_r2();
+	void ldd_r1r3_r2();
+	void ldi_r1r3_r2();
 	void ld_r1r3_n();
-	void ld_nn_r();
+	void ld_nn_r1();
 	void ld_a_c_io();
 	void ld_c_a_io();
 	
+	void inc_r1r3();
+	void inc_sp();
 	void dec_r1r3();
 	void dec_sp();
 };
