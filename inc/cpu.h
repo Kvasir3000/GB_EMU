@@ -107,6 +107,12 @@ enum OPCODE
 	LD_nn_A = 0xEA,
 	LDH_n_A = 0xE0,
 
+    // 16-bit Loads
+    LD_BC_nn = 0x01,
+	LD_DE_nn = 0x11,
+	LD_HL_nn = 0x21,
+	LD_SP_nn = 0x31,
+
 	INC_BC = 0x03,
 	INC_DE = 0x13, 
 	INC_HL = 0x23,
@@ -201,7 +207,8 @@ private:
 	void ldh_n_r1();
 	void ld_a_c_io();
 	void ld_c_a_io();
-	
+	void ld_r1r3_nn();
+	void ld_sp_nn();
 	void inc_r1r3();
 	void inc_sp();
 	void dec_r1r3();

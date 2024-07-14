@@ -23,6 +23,7 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
+		if (PC == 0x10C) return;
 	}
 }
 

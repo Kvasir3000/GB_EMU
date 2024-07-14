@@ -86,6 +86,10 @@ void CPU::init_instruction_table()
 	instruction_table_map[LD_DE_A] =   { "LD_DE_A",   8,  &D,      &A,      &E,      nullptr, &CPU::ld_r1r3_r2 };
 	instruction_table_map[LD_nn_A] =   { "LD_nn_A",   16, &A,      nullptr, nullptr, nullptr, &CPU::ld_nn_r1 };
 	instruction_table_map[LDH_n_A] =   { "LDH_n_A",   12, &A,      nullptr, nullptr, nullptr, &CPU::ldh_n_r1 }; 
+	instruction_table_map[LD_BC_nn] =  { "LD_BC_nn",  12, &B,      nullptr, &C,      nullptr, &CPU::ld_r1r3_nn };
+	instruction_table_map[LD_DE_nn] =  { "LD_DE_nn",  12, &D,      nullptr, &E,      nullptr, &CPU::ld_r1r3_nn };
+	instruction_table_map[LD_HL_nn] =  { "LD_HL_nn",  12, &H,      nullptr, &L,      nullptr, &CPU::ld_r1r3_nn };
+	instruction_table_map[LD_SP_nn] =  { "LD_SP_nn",  12, nullptr, nullptr, nullptr, nullptr, &CPU::ld_sp_nn };
 	instruction_table_map[INC_BC] =    { "INC_BC",    8,  &B,      nullptr, &C,      nullptr, &CPU::inc_r1r3 };
 	instruction_table_map[INC_DE] =    { "INC_DE",    8,  &D,      nullptr, &E,      nullptr, &CPU::inc_r1r3 };
 	instruction_table_map[INC_HL] =    { "INC_HL",    8,  &H,      nullptr, &L,      nullptr, &CPU::inc_r1r3 };
@@ -270,6 +274,33 @@ void CPU::ldh_n_r1()
 	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = ADDR[0x" <<
 		        memory_address << "] = " << current_instruction.parameter_one->register_name <<
 		        " = 0x" << (uint16_t)data << "\n";
+#endif
+}
+
+// Load data from next two bytes of memory to 16-bit r1r3 register
+void CPU::ld_r1r3_nn()
+{
+	uint8_t data_r1 = bus->read_from_memory(++PC);
+	uint8_t data_r2 = bus->read_from_memory(++PC);
+
+	current_instruction.parameter_one->register_value = data_r1;
+	current_instruction.parameter_three->register_value = data_r2;
+
+#if defined DEBUG
+	log_file << ": " << current_instruction.parameter_one->register_name + current_instruction.parameter_three->register_name <<
+		        " = 0x" << combine_two_8_bit_registers(data_r1, data_r2) << "\n";
+#endif
+}
+
+// Load data from next two bytes of memory to 16-bit sp register
+void CPU::ld_sp_nn()
+{
+	uint8_t upper_byte = bus->read_from_memory(++PC);
+	uint8_t lower_byte = bus->read_from_memory(++PC);
+	SP = combine_two_8_bit_registers(upper_byte, lower_byte);
+
+#if defined DEBUG
+	log_file << ": SP = 0x" << SP << "\n";
 #endif
 }
 
