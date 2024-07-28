@@ -1,3 +1,3 @@
 #include <stdint.h>
 
-uint16_t combine_two_8_bit_registers(uint8_t register_one, uint16_t register_two);
+uint16_t combine_two_bytes(uint8_t high_byte, uint8_t low_byte);

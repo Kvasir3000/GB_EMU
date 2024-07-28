@@ -112,6 +112,21 @@ enum OPCODE
 	LD_DE_nn = 0x11,
 	LD_HL_nn = 0x21,
 	LD_SP_nn = 0x31,
+	LD_SP_HL = 0xF9,
+	LD_HL_SP_n = 0xF8,
+	LD_nn_SP = 0x08,
+
+	PUSH_AF = 0xF5,
+	PUSH_BC = 0xC5,
+	PUSH_DE = 0xD5,
+	PUSH_HL = 0xE5,
+
+	POP_AF = 0xF1,
+	POP_BC = 0xC1,
+	POP_DE = 0xD1,
+	POP_HL = 0xE1,
+
+	ADD_SP_n = 0xE8,
 
 	INC_BC = 0x03,
 	INC_DE = 0x13, 
@@ -209,6 +224,14 @@ private:
 	void ld_c_a_io();
 	void ld_r1r3_nn();
 	void ld_sp_nn();
+	void ld_sp_r1r3();
+	void ld_r1r3_sp_n();
+	void ld_nn_sp();
+	void push_af();
+	void push_r1r3();
+	void pop_af();
+	void pop_r1r3();
+	void add_sp_n();
 	void inc_r1r3();
 	void inc_sp();
 	void dec_r1r3();

@@ -11,6 +11,7 @@ CPU::CPU(BUS* bus)
 	E.register_name = "E";
 	H.register_name = "H";
 	L.register_name = "L";
+	F = { 0, 0, 0, 0, 0};
 
 	init_instruction_table();
 	this->bus = bus;
@@ -23,7 +24,7 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
-		if (PC == 0x10C) return;
+		if (PC == 0x116) return;
 	}
 }
 
