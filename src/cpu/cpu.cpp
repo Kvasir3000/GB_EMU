@@ -24,7 +24,7 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
-		if (PC == 0x116) return;
+		if (PC == 0x121) return;
 	}
 }
 
@@ -53,4 +53,13 @@ void CPU::decode_instruction()
 void CPU::execute()
 {
 	(this->*(current_instruction.function_ptr))();
+}
+
+
+void CPU::fill_f_register(bool z, bool n, bool h, bool c)
+{
+	F.Z = z;
+	F.N = n;
+	F.H = h;
+	F.C = c;
 }

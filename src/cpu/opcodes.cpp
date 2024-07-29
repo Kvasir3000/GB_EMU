@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include <cassert>
+#include "utils/debug.h"
 
 void CPU::init_instruction_table()
 {
@@ -101,6 +102,15 @@ void CPU::init_instruction_table()
 	instruction_table_map[POP_BC] =     { "POP_BC",     12, &B,      nullptr, &C,      nullptr, &CPU::pop_r1r3 };
 	instruction_table_map[POP_DE] =     { "POP_DE",     12, &D,      nullptr, &E,      nullptr, &CPU::pop_r1r3 };
 	instruction_table_map[POP_HL] =     { "POP_HL",     12, &H,      nullptr, &L,      nullptr, &CPU::pop_r1r3 };
+	instruction_table_map[ADD_A_A] =    { "ADD_A_A",    4,  &A,      &A,      nullptr, nullptr, &CPU::add_r1_r2};
+	instruction_table_map[ADD_A_B] =    { "ADD_A_B",    4,  &A,      &B,      nullptr, nullptr, &CPU::add_r1_r2 };
+	instruction_table_map[ADD_A_C] =    { "ADD_A_C",    4,  &A,      &C,      nullptr, nullptr, &CPU::add_r1_r2 };
+	instruction_table_map[ADD_A_D] =    { "ADD_A_D",    4,  &A,      &D,      nullptr, nullptr, &CPU::add_r1_r2 };
+	instruction_table_map[ADD_A_E] =    { "ADD_A_E",    4,  &A,      &E,      nullptr, nullptr, &CPU::add_r1_r2 };
+	instruction_table_map[ADD_A_H] =    { "ADD_A_H",    4,  &A,      &H,      nullptr, nullptr, &CPU::add_r1_r2 };
+	instruction_table_map[ADD_A_L] =    { "ADD_A_L",    4,  &A,      &L,      nullptr, nullptr, &CPU::add_r1_r2 };
+	instruction_table_map[ADD_A_HL] =   { "ADD_A_HL",   8,  &A,      &H,      nullptr, &L,      &CPU::add_r1_r2r4 };
+	instruction_table_map[ADD_A_n] =    { "ADD_A_n",    8,  &A,      nullptr, nullptr, nullptr, &CPU::add_r1_n };
 	instruction_table_map[ADD_SP_n] =   { "ADD_SP_n",   16, nullptr, nullptr, nullptr, nullptr, &CPU::add_sp_n };
 	instruction_table_map[INC_BC] =     { "INC_BC",     8,  &B,      nullptr, &C,      nullptr, &CPU::inc_r1r3 };
 	instruction_table_map[INC_DE] =     { "INC_DE",     8,  &D,      nullptr, &E,      nullptr, &CPU::inc_r1r3 };
@@ -115,23 +125,22 @@ void CPU::init_instruction_table()
 // Load the next byte of data to r1 register
 void CPU::ld_r1_n()
 {
-	current_instruction.parameter_one->register_value = bus->read_from_memory(++PC);
+	REG_VAL(one) = bus->read_from_memory(++PC);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name << " = 0x" <<
-		                (uint16_t)current_instruction.parameter_one->register_value << "\n";
+	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 
 // Load data from memory address stored at next 2-bytes of memory to r1 register
 void CPU::ld_r1_nn()
 {
-	uint16_t memory_addr = (bus->read_from_memory(++PC) << 8) | (bus->read_from_memory(++PC));
-	current_instruction.parameter_one->register_value = bus->read_from_memory(memory_addr);
+	uint16_t memory_addr = (bus->read_from_memory(++PC)) | (bus->read_from_memory(++PC) << 8);
+	REG_VAL(one) = bus->read_from_memory(memory_addr);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name << "= ADDR[0x" << memory_addr << 
-		                "] = 0x" << (uint16_t)current_instruction.parameter_one->register_value << "\n";
+	log_file << ": " << REG_NAME(one) << "= " << ADDR(memory_addr) << 
+		        (uint16_t)REG_VAL(one) << "\n";
 #endif 
 }
 
@@ -140,38 +149,35 @@ void CPU::ldh_r1_n()
 {
 	uint8_t  memory_offset = bus->read_from_memory(++PC);
 	uint16_t memory_address = 0xFF00 + memory_offset;
-	current_instruction.parameter_one->register_value = bus->read_from_memory(memory_address);
+	REG_VAL(one) = bus->read_from_memory(memory_address);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name << " = ADDR[0xFF00 + 0x" <<
-		        (uint16_t)memory_offset << "] = ADDR[0x" << memory_address << "] = 0x" <<
-		        (uint16_t)current_instruction.parameter_one->register_value << "\n";
+	log_file << ": " << REG_NAME(one) << " = ADDR[0xFF00 + 0x" <<
+		        (uint16_t)memory_offset << "] = " << ADDR(memory_address) << "0x" <<
+		        (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 
 // Load data from r2 to r1 register
 void CPU::ld_r1_r2()
 {
-	current_instruction.parameter_one->register_value = current_instruction.parameter_two->register_value;
+	REG_VAL(one) = REG_VAL(two);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name << " = " << 
-		                current_instruction.parameter_two->register_name << " = 0x" << 
-		                (uint16_t)current_instruction.parameter_one->register_value  << "\n";
+	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(two) << " = 0x" << 
+		        (uint16_t)REG_VAL(one)  << "\n";
 #endif
 }
 
 // Load data from memory address stored in 16-bit r2r4 register to r1 register
 void CPU::ld_r1_r2r4()
 {
-	uint16_t memory_addr = combine_two_bytes(current_instruction.parameter_two->register_value,
-		                                     current_instruction.parameter_four->register_value);
-	current_instruction.parameter_one->register_value = bus->read_from_memory(memory_addr);
+	uint16_t memory_addr = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	REG_VAL(one) = bus->read_from_memory(memory_addr);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name << " = " <<
-		                "ADDR[0x" << memory_addr << "] = 0x" << 
-						(uint16_t)current_instruction.parameter_one->register_value << "\n";
+	log_file << ": " << REG_NAME(one) << " = " << ADDR(memory_addr) <<
+		        "0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 
@@ -179,8 +185,8 @@ void CPU::ld_r1_r2r4()
 void CPU::ldd_r1_r2r4()
 {
 	ld_r1_r2r4();
-	current_instruction.parameter_one = current_instruction.parameter_two;
-	current_instruction.parameter_three = current_instruction.parameter_four;
+	REG_VAL(one) = REG_VAL(two);
+	REG_VAL(three) = REG_VAL(four);
 	current_instruction.parameter_two = nullptr;
 	current_instruction.parameter_four = nullptr;
 
@@ -196,8 +202,8 @@ void CPU::ldd_r1_r2r4()
 void CPU::ldi_r1_r2r4()
 {
 	ld_r1_r2r4();
-	current_instruction.parameter_one = current_instruction.parameter_two;
-	current_instruction.parameter_three = current_instruction.parameter_four;
+	REG_VAL(one) = REG_VAL(two);
+	REG_VAL(three) = REG_VAL(four);
 	current_instruction.parameter_two = nullptr;
 	current_instruction.parameter_four = nullptr;
 
@@ -212,13 +218,12 @@ void CPU::ldi_r1_r2r4()
 // Load data from r register to memory address stored at 16-bit r1r3 register
 void CPU::ld_r1r3_r2()
 {
-	uint16_t memory_addr = combine_two_bytes(current_instruction.parameter_one->register_value,
-		                                     current_instruction.parameter_three->register_value);
-	bus->write_to_memory(memory_addr, current_instruction.parameter_two->register_value);
+	uint16_t memory_addr = combine_two_bytes(REG_VAL(one), REG_VAL(three));
+	bus->write_to_memory(memory_addr, REG_VAL(two));
 
 #if defined DEBUG
-	log_file << ": ADDR[0x" << memory_addr << "] = " << current_instruction.parameter_two->register_name << 
-		        " = 0x" << (uint16_t)current_instruction.parameter_two->register_value << "\n";
+	log_file << ": " << ADDR(memory_addr) << REG_VAL(two) << 
+		        " = 0x" << (uint16_t)REG_VAL(two) << "\n";
 #endif
 }
 
@@ -251,26 +256,24 @@ void CPU::ldi_r1r3_r2()
 // Load data from next byte to memory address stored at 16-bit r1r3 register
 void CPU::ld_r1r3_n()
 {
-	uint16_t memory_addr = combine_two_bytes(current_instruction.parameter_one->register_value,
-		                                     current_instruction.parameter_three->register_value);
+	uint16_t memory_addr = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	uint8_t  data = bus->read_from_memory(++PC);
 	bus->write_to_memory(memory_addr, data);
 
 #if defined DEBUG
-	log_file << ": ADDR[0x" << memory_addr << "] = " << (uint16_t)data << "\n";
+	log_file << ": " << ADDR(memory_addr) << (uint16_t)data << "\n";
 #endif
 }
 
 // Load data from register r1 to memory address stored at next 2-bytes 
 void CPU::ld_nn_r1()
 {
-	uint8_t data = current_instruction.parameter_one->register_value;
 	uint16_t memory_addr = (bus->read_from_memory(++PC)) | (bus->read_from_memory(++PC) << 8);
-	bus->write_to_memory(memory_addr, data);
+	bus->write_to_memory(memory_addr, REG_VAL(one));
 
 #if defined DEBUG
-	log_file << ": ADDR[0x" << memory_addr << "] = " << current_instruction.parameter_one->register_name <<
-		        " = 0x" << (uint16_t)data << "\n";
+	log_file << ": " << ADDR(memory_addr) << REG_NAME(one) <<
+		        " = 0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 
@@ -279,28 +282,24 @@ void CPU::ldh_n_r1()
 {
 	uint8_t  address_offset = bus->read_from_memory(++PC);
 	uint16_t memory_address = 0xFF00 + address_offset;
-	uint8_t  data = current_instruction.parameter_one->register_value;
-	bus->write_to_memory(memory_address, data);
+	bus->write_to_memory(memory_address, REG_VAL(one));
 
 #if defined DEBUG
-	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = ADDR[0x" <<
-		        memory_address << "] = " << current_instruction.parameter_one->register_name <<
-		        " = 0x" << (uint16_t)data << "\n";
+	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = " << 
+		        ADDR(memory_address) << REG_NAME(one) <<
+		        " = 0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 
 // Load data from next two bytes of memory to 16-bit r1r3 register
 void CPU::ld_r1r3_nn()
 {
-	uint8_t data_r1 = bus->read_from_memory(++PC);
-	uint8_t data_r2 = bus->read_from_memory(++PC);
-
-	current_instruction.parameter_one->register_value = data_r1;
-	current_instruction.parameter_three->register_value = data_r2;
+	REG_VAL(three) = bus->read_from_memory(++PC);
+	REG_VAL(one) = bus->read_from_memory(++PC);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name + current_instruction.parameter_three->register_name <<
-		        " = 0x" << combine_two_bytes(data_r1, data_r2) << "\n";
+	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = 0x" << 
+		        combine_two_bytes(REG_VAL(one), REG_VAL(three)) << "\n";
 #endif
 }
 
@@ -320,14 +319,11 @@ void CPU::ld_sp_nn()
 // Load data from 16-bit r1r3 register to sp register
 void CPU::ld_sp_r1r3()
 {
-	uint16_t data = combine_two_bytes(current_instruction.parameter_one->register_value,
-		                              current_instruction.parameter_three->register_value);
-	SP = data;
+	SP = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 
 #if defined DEBUG
-	log_file << ": SP = " << current_instruction.parameter_one->register_name +
-                current_instruction.parameter_three->register_name << " = 0x" << 
-		        data << "\n";
+	log_file << ": SP = " << REG_NAME(one) + REG_NAME(three) << " = 0x" << 
+		        SP << "\n";
 #endif
 }
 
@@ -337,19 +333,15 @@ void CPU::ld_r1r3_sp_n()
 {
 	int8_t byte = bus->read_from_memory(++PC);
 	uint16_t result = SP + byte;
-	F.Z = 0;
-	F.N = 0;
-	F.H = (((byte & 0xF) + (SP & 0xF)) & 0x10) == 0x10;
-	F.C = (((byte & 0xFF) + (SP & 0xFF)) & 0x100) == 0x100;
+	fill_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 
-	current_instruction.parameter_one->register_value = result >> 8;
-	current_instruction.parameter_three->register_value = (result << 8) >> 8;
+	REG_VAL(one) = result >> 8;
+	REG_VAL(three) = (result << 8) >> 8;
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name + current_instruction.parameter_three->register_name <<
-		        " = SP + n = 0x" << SP << " + 0x" << (((uint16_t)byte) & 0xFF) << " = 0x" << result << 
-		        ": F.Z = " << (uint16_t)F.Z << " F.N = " << (uint16_t)F.N << " F.H = " << (uint16_t)F.H <<
-		        " F.C = " << (uint16_t)F.C << "\n";
+	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = SP + n = 0x" << 
+		        SP << " + 0x" << (((uint16_t)byte) & 0xFF) << " = 0x" << result << 
+		        F_REG_BITS << "\n";
 #endif
 }
 
@@ -368,9 +360,9 @@ void CPU::ld_nn_sp()
 #if defined DEBUG
 	uint16_t memory_address_1 = --memory_address;
 	uint16_t memory_address_2 = ++memory_address;
-	log_file << ": ADDR[0x" << (uint16_t)(memory_address_1) << "] = 0x" <<
-		        (uint16_t)bus->read_from_memory(memory_address_1) << "(SP_LOW)\n\t\t\t\t ADDR[" <<
-		        "0x" << (uint16_t)(memory_address_2) << "] = 0x" <<
+	log_file << ": " << ADDR(memory_address_1) << "0x" <<
+		        (uint16_t)bus->read_from_memory(memory_address_1) << "(SP_LOW)\n\t\t\t\t " <<
+		        ADDR(memory_address_2) << "0x" <<
 		        (uint16_t)bus-> read_from_memory(memory_address_2) << "(SP_HIGH)\n";
 #endif
 }
@@ -380,18 +372,13 @@ void CPU::ld_nn_sp()
 void CPU::push_af()
 {
 	bus->write_to_memory(--SP, A.register_value);
-	F.H = 1;
-	F.Z = 1;
-	F.N = 1;
 	uint8_t f_register = (F.Z << 7) | (F.N << 6) | (F.H << 5) | (F.C << 4);
 	bus->write_to_memory(--SP, f_register);
 
 #if defined DEBUG
-	log_file << ": ADDR[SP] = ADDR[0x" << SP + 1 << "] = A = 0x" << (uint16_t)A.register_value <<
-		        "\n\t\t\t\tADDR[SP] = ADDR[0x" << SP << "] = F = 0x" << 
-		        (uint16_t)f_register << ": F.Z = " << (uint16_t)F.Z <<
-		        " F.N = " << (uint16_t)F.N << " F.H = " << (uint16_t)F.H << " F.C = " <<
-		        (uint16_t)F.C << "\n"; "\n";
+	log_file << ": " << ADDR_SP(SP + 1) << "A = 0x" << (uint16_t)A.register_value <<
+		        "\n\t\t\t\t" << ADDR_SP(SP) << "F = 0x" << 
+		        (uint16_t)f_register << F_REG_BITS << "\n";
 #endif
 }
 
@@ -399,16 +386,13 @@ void CPU::push_af()
 // Push r1r3 register to stack
 void CPU::push_r1r3()
 {
-	bus->write_to_memory(--SP, current_instruction.parameter_one->register_value);
-	bus->write_to_memory(--SP, current_instruction.parameter_three->register_value);
+	bus->write_to_memory(--SP, REG_VAL(one));
+	bus->write_to_memory(--SP, REG_VAL(three));
 
 #if defined DEBUG
-	log_file << ": ADDR[SP] = ADDR[0x" << SP + 1 << "] = " << 
-		        current_instruction.parameter_one->register_name << " = 0x" << 
-		        (uint16_t)current_instruction.parameter_one->register_value <<
-		        "\n\t\t\t\tADDR[SP] = ADDR[0x" << SP << "] = " << 
-		        current_instruction.parameter_three->register_name << " = 0x" <<
-		        (uint16_t)current_instruction.parameter_three->register_value << "\n";
+	log_file << ": " << ADDR_SP(SP + 1) << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << 
+		        "\n\t\t\t\t" << ADDR_SP(SP) << REG_NAME(three) << " = 0x" <<
+		        (uint16_t)REG_VAL(three) << "\n";
 #endif
 }
 
@@ -417,15 +401,15 @@ void CPU::push_r1r3()
 void CPU::pop_af()
 {
 	uint8_t f_data = bus->read_from_memory(SP++);
+	//fill_f_register(f_data >> 7, f_data << 1 >> 7, f_data << 2 >> 7, f_data << 3 >> 7);
+	assert(false); // use fill function instead
 	F = { (uint8_t)(f_data >> 7), (uint8_t)(f_data << 1 >> 7), (uint8_t)(f_data << 2 >> 7), (uint8_t)(f_data << 3 >> 7)};
 	uint8_t data = bus->read_from_memory(SP++);
 	A.register_value = data;
 
 #if defined DEBUG
-	log_file << ": F = ADDR[SP] = ADDR[0x" << SP - 2 << "] = 0x" <<  (uint16_t)f_data << 
-		        ": F.Z = " << (uint16_t)F.Z << " F.N = " << (uint16_t)F.N << 
-		        " F.H = " << (uint16_t)F.H << " F.C = " << (uint16_t)F.C << 
-		        "\n\t\t\t       A = ADDR[SP] = ADDR[0x" << SP - 1 << "] = 0x" << 
+	log_file << ": F = " << ADDR_SP(SP - 2) << "0x" <<  (uint16_t)f_data << 
+		        F_REG_BITS  << "\n\t\t\t       A = " << ADDR_SP(SP - 1) <<"0x" << 
 		        (uint16_t)A.register_value << "\n";
 #endif
 }
@@ -434,18 +418,66 @@ void CPU::pop_af()
 // Pop 16-bit r1r3 register from stack
 void CPU::pop_r1r3()
 {
-	uint8_t data = bus->read_from_memory(SP++);
-	current_instruction.parameter_three->register_value = data;
-	data = bus->read_from_memory(SP++);
-	current_instruction.parameter_one->register_value = data;
+	REG_VAL(three) = bus->read_from_memory(SP++);
+	REG_VAL(one) = bus->read_from_memory(SP++);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_three->register_name << 
-		        " = ADDR[SP] = ADDR[0x" << SP - 2 << "] = 0x" << 
-		        (uint16_t)current_instruction.parameter_three->register_value << 
-		        "\n\t\t\t       " << current_instruction.parameter_one->register_name << 
-		        " = ADDR[SP] = ADDR[0x" << SP - 1 << "] = 0x" << 
-		        (uint16_t)current_instruction.parameter_one->register_value << "\n";
+	log_file << ": " << REG_NAME(three) << " = " << ADDR_SP(SP - 2) << "0x" << 
+		        (uint16_t)REG_VAL(three) << "\n\t\t\t       " << REG_NAME(one) <<
+		        " = " << ADDR_SP(SP - 1) << "0x" << (uint16_t)REG_VAL(one) << "\n";
+#endif
+}
+
+
+// Add r2 register to r1
+void CPU::add_r1_r2()
+{
+	uint8_t value_one = REG_VAL(one);
+	uint8_t value_two = REG_VAL(two);
+ 	uint8_t result = value_one + value_two;
+	fill_f_register(result == 0, 0, is_half_carry(value_one, value_two), is_carry(value_one, value_two));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " + " << REG_NAME(two) <<
+		       " = 0x" << (uint16_t)value_one << " + 0x" << (uint16_t)value_two <<
+		       " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Add data from ADDR[r1r4] to r1 register
+void CPU::add_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t data = bus->read_from_memory(memory_address);
+	uint8_t register_value = REG_VAL(one);
+	uint8_t result = data + register_value;
+	fill_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " + "<< ADDR(memory_address) << 
+		        "0x" << (uint16_t)register_value << " + 0x" << (uint16_t)data << 
+		        " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Add data from next byte of memory to r1 register
+void CPU::add_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t register_value = REG_VAL(one);
+	uint8_t result = data + register_value;
+	fill_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) <<
+	 	        " + 0x" << (uint16_t)data << " = 0x" << (uint16_t)register_value <<
+		        " + 0x" << (uint16_t)data << " = 0x" << (uint16_t)result <<
+		        F_REG_BITS << "\n";
 #endif
 }
 
@@ -453,65 +485,61 @@ void CPU::pop_r1r3()
 // Load data from address[$FF00 + C] to register A. $FF00 - $FF7F IO ports range addresses  
 void CPU::ld_a_c_io()
 {
-	uint16_t memory_address = 0xFF00 + current_instruction.parameter_two->register_value;
-	current_instruction.parameter_one->register_value = bus->read_from_memory(memory_address);
+	uint16_t memory_address = 0xFF00 + REG_VAL(two);
+	REG_VAL(one) = bus->read_from_memory(memory_address);
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name <<
-		        " = ADDR[0xFF00 +  " << current_instruction.parameter_two->register_name <<
-		        "] = ADDR[0x" << memory_address << "] = 0x" <<
-		        (uint16_t)current_instruction.parameter_one->register_value << "\n";
+	log_file << ": " << REG_NAME(one) << " = ADDR[0xFF00 + " << REG_NAME(two) <<
+		        "] = " << ADDR(memory_address) << "0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
+
 
 // Load data from register A to address[$FF00 + C]. $FF00 - $FF7F IO ports range addresses  
 void CPU::ld_c_a_io()
 {
-	uint16_t memory_address = 0xFF00 + current_instruction.parameter_one->register_value;
-	uint8_t  data = current_instruction.parameter_two->register_value;
+	uint16_t memory_address = 0xFF00 + REG_VAL(one);
+	uint8_t  data = REG_VAL(two);
 	bus->write_to_memory(memory_address, data);
 
 #if defined DEBUG
-	log_file << ": ADDR[0xFF00 +  " << current_instruction.parameter_one->register_name <<"] = ADDR[0x" << 
-		        memory_address << "] = " << current_instruction.parameter_two->register_name << 
+	log_file << ": ADDR[0xFF00 + " << REG_NAME(one) <<"] =" << 
+		        ADDR(memory_address) << REG_NAME(two) << 
  		        " = 0x" << (uint16_t)data << "\n";
 #endif
 }
+
 
 // Add the next byte of memory to SP register
 void CPU::add_sp_n()
 {
 	int8_t byte = bus->read_from_memory(++PC);
 	uint16_t result = SP + byte;
-	F.Z = 0;
-	F.N = 0;
-	F.H = (((byte & 0xF) + (SP & 0xF)) & 0x10) == 0x10; 
-	F.C = (((byte & 0xFF) + (SP & 0xFF)) & 0x100) == 0x100; 
+	fill_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 	
 #if defined DEBUG 
 	log_file << ": SP = 0x" << SP << " + 0x" << (((uint16_t)byte) & 0xFF) <<
-		        " = 0x" << result << ": F.Z = "<< (uint16_t)F.Z << " F.N = " << 
-		        (uint16_t)F.N << " F.H = " << (uint16_t)F.H << " F.C = " << 
-		        (uint16_t)F.C << "\n";
+		        " = 0x" << result << F_REG_BITS << "\n";
 #endif
 
 	SP = result;
 }
 
+
 // Increment 16-bit r1r3 register
 void CPU::inc_r1r3()
 {
-	uint16_t register_data = combine_two_bytes(current_instruction.parameter_one->register_value,
-		                                       current_instruction.parameter_three->register_value);
+	uint16_t register_data = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	register_data++;
-	current_instruction.parameter_one->register_value = register_data >> 8;
-	current_instruction.parameter_three->register_value = (register_data << 8) >> 8;
+	REG_VAL(one) = register_data >> 8;
+	REG_VAL(three) = (register_data << 8) >> 8;
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name + current_instruction.parameter_three->register_name <<
-		        " = 0x" << register_data - 1 << " -> 0x" << register_data << "\n";
+	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = 0x" << 
+		        register_data - 1 << " -> 0x" << register_data << "\n";
 #endif
 }
+
 
 // Increment SP register
 void CPU::inc_sp()
@@ -523,20 +551,21 @@ void CPU::inc_sp()
 #endif
 }
 
+
 // Decrement 16-bit r1r3 register
 void CPU::dec_r1r3()
 {
-	uint16_t register_data = combine_two_bytes(current_instruction.parameter_one->register_value,
-		                                       current_instruction.parameter_three->register_value);
+	uint16_t register_data = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	register_data--;
-	current_instruction.parameter_one->register_value = register_data >> 8;
-	current_instruction.parameter_three->register_value = (register_data << 8) >> 8;
+	REG_VAL(one) = register_data >> 8;
+	REG_VAL(three) = (register_data << 8) >> 8;
 
 #if defined DEBUG
-	log_file << ": " << current_instruction.parameter_one->register_name + current_instruction.parameter_three->register_name << 
+	log_file << ": " << REG_NAME(one) + REG_NAME(three) << 
 		        " = 0x" << register_data + 1 << " -> 0x" << register_data << "\n";
 #endif
 }
+
 
 // Decrement SP register
 void CPU::dec_sp()

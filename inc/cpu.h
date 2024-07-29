@@ -126,6 +126,16 @@ enum OPCODE
 	POP_DE = 0xD1,
 	POP_HL = 0xE1,
 
+	ADD_A_A  = 0x87,
+    ADD_A_B  = 0x80,
+	ADD_A_C  = 0x81,
+	ADD_A_D =  0x82,
+	ADD_A_E =  0x83,
+	ADD_A_H  = 0x84,
+	ADD_A_L  = 0x85,
+	ADD_A_HL = 0x86,
+	ADD_A_n  = 0xC6,
+
 	ADD_SP_n = 0xE8,
 
 	INC_BC = 0x03,
@@ -172,6 +182,7 @@ private:
 		uint8_t C : 1;
 		uint8_t free_bits : 4;
 	} F;
+	void fill_f_register(bool z, bool n, bool h, bool c);
 
 	uint16_t PC;
 	uint16_t SP;
@@ -231,6 +242,9 @@ private:
 	void push_r1r3();
 	void pop_af();
 	void pop_r1r3();
+	void add_r1_r2();
+	void add_r1_r2r4();
+	void add_r1_n();
 	void add_sp_n();
 	void inc_r1r3();
 	void inc_sp();
