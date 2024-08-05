@@ -111,6 +111,85 @@ void CPU::init_instruction_table()
 	instruction_table_map[ADD_A_L] =    { "ADD_A_L",    4,  &A,      &L,      nullptr, nullptr, &CPU::add_r1_r2 };
 	instruction_table_map[ADD_A_HL] =   { "ADD_A_HL",   8,  &A,      &H,      nullptr, &L,      &CPU::add_r1_r2r4 };
 	instruction_table_map[ADD_A_n] =    { "ADD_A_n",    8,  &A,      nullptr, nullptr, nullptr, &CPU::add_r1_n };
+	instruction_table_map[ADC_A_A] =    { "ADC_A_A",    4,  &A,      &A,      nullptr, nullptr, &CPU::adc_r1_r2};
+	instruction_table_map[ADC_A_B] =    { "ADC_A_B",    4,  &A,      &B,      nullptr, nullptr, &CPU::adc_r1_r2 };
+	instruction_table_map[ADC_A_C] =    { "ADC_A_C",    4,  &A,      &C,      nullptr, nullptr, &CPU::adc_r1_r2 };
+	instruction_table_map[ADC_A_D] =    { "ADC_A_D",    4,  &A,      &D,      nullptr, nullptr, &CPU::adc_r1_r2 };
+	instruction_table_map[ADC_A_E] =    { "ADC_A_E",    4,  &A,      &E,      nullptr, nullptr, &CPU::adc_r1_r2 };
+	instruction_table_map[ADC_A_H] =    { "ADC_A_H",    4,  &A,      &H,      nullptr, nullptr, &CPU::adc_r1_r2 };
+	instruction_table_map[ADC_A_L] =    { "ADC_A_L",    4,  &A,      &L,      nullptr, nullptr, &CPU::adc_r1_r2 };
+	instruction_table_map[ADC_A_HL] =   { "ADC_A_HL",   8,  &A,      &H,      nullptr, &L,      &CPU::adc_r1_r2r4 };
+	instruction_table_map[ADC_A_n] =    { "ADC_A_n",    8,  &A,      nullptr, nullptr, nullptr, &CPU::adc_r1_n };
+	instruction_table_map[SUB_A] =      { "SUB_A",      4,  &A,      &A,      nullptr, nullptr, &CPU::sub_r1_r2};
+	instruction_table_map[SUB_B] =      { "SUB_B",      4,  &A,      &B,      nullptr, nullptr, &CPU::sub_r1_r2 };
+	instruction_table_map[SUB_C] =      { "SUB_C",      4,  &A,      &C,      nullptr, nullptr, &CPU::sub_r1_r2 };
+	instruction_table_map[SUB_D] =      { "SUB_D",      4,  &A,      &D,      nullptr, nullptr, &CPU::sub_r1_r2};
+	instruction_table_map[SUB_E] =      { "SUB_E",      4,  &A,      &E,      nullptr, nullptr, &CPU::sub_r1_r2 };
+	instruction_table_map[SUB_H] =      { "SUB_H",      4,  &A,      &H,      nullptr, nullptr, &CPU::sub_r1_r2 };
+	instruction_table_map[SUB_L] =      { "SUB_L",      4,  &A,      &L,      nullptr, nullptr, &CPU::sub_r1_r2 };
+	instruction_table_map[SUB_HL] =     { "SUB_HL",     8,  &A,      &H,      nullptr, &L,      &CPU::sub_r1_r2r4 };
+	instruction_table_map[SUB_n] =      { "SUB_n",      8,  &A,      nullptr, nullptr, nullptr, &CPU::sub_r1_n };
+	instruction_table_map[SBC_A_A] =    { "SBC_A_A",    4,  &A,      &A,      nullptr, nullptr, &CPU::sbc_r1_r2 };
+	instruction_table_map[SBC_A_B] =    { "SBC_A_B",    4,  &A,      &B,      nullptr, nullptr, &CPU::sbc_r1_r2 };
+	instruction_table_map[SBC_A_C] =    { "SBC_A_C",    4,  &A,      &C,      nullptr, nullptr, &CPU::sbc_r1_r2 };
+	instruction_table_map[SBC_A_D] =    { "SBC_A_D",    4,  &A,      &D,      nullptr, nullptr, &CPU::sbc_r1_r2 };
+	instruction_table_map[SBC_A_E] =    { "SBC_A_E",    4,  &A,      &E,      nullptr, nullptr, &CPU::sbc_r1_r2 };
+	instruction_table_map[SBC_A_H] =    { "SBC_A_H",    4,  &A,      &H,      nullptr, nullptr, &CPU::sbc_r1_r2 };
+	instruction_table_map[SBC_A_L] =    { "SBC_A_L",    4,  &A,      &L,      nullptr, nullptr, &CPU::sbc_r1_r2 };
+	instruction_table_map[SBC_A_HL] =   { "SBC_A_HL",   8,  &A,      &H,      nullptr, &L,      &CPU::sbc_r1_r2r4 };
+	instruction_table_map[SBC_A_n] =    { "SBC_A_n",    8,  &A,      nullptr, nullptr, nullptr, &CPU::sbc_r1_n };
+	instruction_table_map[AND_A] =      { "AND_A",      4,  &A,      &A,      nullptr, nullptr, &CPU::and_r1_r2 };
+	instruction_table_map[AND_B] =      { "AND_B",      4,  &A,      &B,      nullptr, nullptr, &CPU::and_r1_r2 };
+	instruction_table_map[AND_C] =      { "AND_C",      4,  &A,      &C,      nullptr, nullptr, &CPU::and_r1_r2 };
+	instruction_table_map[AND_D] =      { "AND_D",      4,  &A,      &D,      nullptr, nullptr, &CPU::and_r1_r2 };
+	instruction_table_map[AND_E] =      { "AND_E",      4,  &A,      &E,      nullptr, nullptr, &CPU::and_r1_r2 };
+	instruction_table_map[AND_H] =      { "AND_H",      4,  &A,      &H,      nullptr, nullptr, &CPU::and_r1_r2 };
+	instruction_table_map[AND_L] =      { "AND_L",      4,  &A,      &L,      nullptr, nullptr, &CPU::and_r1_r2 };
+	instruction_table_map[AND_HL] =     { "AND_HL",     8,  &A,      &H,      nullptr, &L,      &CPU::and_r1_r2r4 };
+	instruction_table_map[AND_n] =      { "AND_n",      8,  &A,      nullptr, nullptr, nullptr, &CPU::and_r1_n };
+	instruction_table_map[OR_A] =       { "OR_A",       4,  &A,      &A,      nullptr, nullptr, &CPU::or_r1_r2 };
+	instruction_table_map[OR_B] =       { "OR_B",       4,  &A,      &B,      nullptr, nullptr, &CPU::or_r1_r2 };
+	instruction_table_map[OR_C] =       { "OR_C",       4,  &A,      &C,      nullptr, nullptr, &CPU::or_r1_r2 };
+	instruction_table_map[OR_D] =       { "OR_D",       4,  &A,      &D,      nullptr, nullptr, &CPU::or_r1_r2 };
+	instruction_table_map[OR_E] =       { "OR_E",       4,  &A,      &E,      nullptr, nullptr, &CPU::or_r1_r2 };
+	instruction_table_map[OR_H] =       { "OR_H",       4,  &A,      &H,      nullptr, nullptr, &CPU::or_r1_r2 };
+	instruction_table_map[OR_L] =       { "OR_L",       4,  &A,      &L,      nullptr, nullptr, &CPU::or_r1_r2 };
+	instruction_table_map[OR_HL] =      { "OR_HL",      8,  &A,      &H,      nullptr, &L,      &CPU::or_r1_r2r4 };
+	instruction_table_map[OR_n] =       { "OR_n",       8,  &A,      nullptr, nullptr, nullptr, &CPU::or_r1_n };
+	instruction_table_map[XOR_A] =      { "XOR_A",      4,  &A,      &A,      nullptr, nullptr, &CPU::xor_r1_r2 };
+	instruction_table_map[XOR_B] =      { "XOR_B",      4,  &A,      &B,      nullptr, nullptr, &CPU::xor_r1_r2 };
+	instruction_table_map[XOR_C] =      { "XOR_C",      4,  &A,      &C,      nullptr, nullptr, &CPU::xor_r1_r2 };
+	instruction_table_map[XOR_D] =      { "XOR_D",      4,  &A,      &D,      nullptr, nullptr, &CPU::xor_r1_r2 };
+	instruction_table_map[XOR_E] =      { "XOR_E",      4,  &A,      &E,      nullptr, nullptr, &CPU::xor_r1_r2 };
+	instruction_table_map[XOR_H] =      { "XOR_H",      4,  &A,      &H,      nullptr, nullptr, &CPU::xor_r1_r2 };
+	instruction_table_map[XOR_L] =      { "XOR_L",      4,  &A,      &L,      nullptr, nullptr, &CPU::xor_r1_r2 };
+	instruction_table_map[XOR_HL] =     { "XOR_HL",     8,  &A,      &H,      nullptr, &L,      &CPU::xor_r1_r2r4 };
+	instruction_table_map[XOR_n] =      { "XOR_n",      8,  &A,      nullptr, nullptr, nullptr, &CPU::xor_r1_n };
+	instruction_table_map[CP_A] =       { "CP_A",       4,  &A,      &A,      nullptr, nullptr, &CPU::cp_r1_r2 };
+	instruction_table_map[CP_B] =       { "CP_B",       4,  &A,      &B,      nullptr, nullptr, &CPU::cp_r1_r2 };
+	instruction_table_map[CP_C] =       { "CP_C",       4,  &A,      &C,      nullptr, nullptr, &CPU::cp_r1_r2 };
+	instruction_table_map[CP_D] =       { "CP_D",       4,  &A,      &D,      nullptr, nullptr, &CPU::cp_r1_r2 };
+	instruction_table_map[CP_E] =       { "CP_E",       4,  &A,      &E,      nullptr, nullptr, &CPU::cp_r1_r2 };
+	instruction_table_map[CP_H] =       { "CP_H",       4,  &A,      &H,      nullptr, nullptr, &CPU::cp_r1_r2 };
+	instruction_table_map[CP_L] =       { "CP_L",       4,  &A,      &L,      nullptr, nullptr, &CPU::cp_r1_r2 };
+	instruction_table_map[CP_HL] =      { "CP_HL",      8,  &A,      &H,      nullptr, &L,      &CPU::cp_r1_r2r4 };
+	instruction_table_map[CP_n] =       { "CP_n",       8,  &A,      nullptr, nullptr, nullptr, &CPU::cp_r1_n };
+	instruction_table_map[INC_A] =      { "INC_A",      4,  &A,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
+	instruction_table_map[INC_B] =      { "INC_B",      4,  &B,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
+	instruction_table_map[INC_C] =      { "INC_C",      4,  &C,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
+	instruction_table_map[INC_D] =      { "INC_D",      4,  &D,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
+	instruction_table_map[INC_E] =      { "INC_E",      4,  &E,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
+	instruction_table_map[INC_H] =      { "INC_H",      4,  &H,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
+	instruction_table_map[INC_L] =      { "INC_L",      4,  &L,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
+	instruction_table_map[INC_HL_A] =   { "INC_[HL]",   12, nullptr, &H,      nullptr, &L,      &CPU::inc_r2r4 };
+	instruction_table_map[DEC_A] =      { "DEC_A",      4,  &A,      nullptr, nullptr, nullptr, &CPU::dec_r1};
+	instruction_table_map[DEC_B] =      { "DEC_B",      4,  &B,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
+	instruction_table_map[DEC_C] =      { "DEC_C",      4,  &C,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
+	instruction_table_map[DEC_D] =      { "DEC_D",      4,  &D,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
+	instruction_table_map[DEC_E] =      { "DEC_E",      4,  &E,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
+	instruction_table_map[DEC_H] =      { "DEC_H",      4,  &H,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
+	instruction_table_map[DEC_L] =      { "DEC_A",      4,  &L,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
+	instruction_table_map[DEC_HL_A] =   { "DEC_[HL]",   12, nullptr, &H,      nullptr, &L,      &CPU::dec_r2r4 };
 	instruction_table_map[ADD_SP_n] =   { "ADD_SP_n",   16, nullptr, nullptr, nullptr, nullptr, &CPU::add_sp_n };
 	instruction_table_map[INC_BC] =     { "INC_BC",     8,  &B,      nullptr, &C,      nullptr, &CPU::inc_r1r3 };
 	instruction_table_map[INC_DE] =     { "INC_DE",     8,  &D,      nullptr, &E,      nullptr, &CPU::inc_r1r3 };
@@ -120,7 +199,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[DEC_DE] =     { "DEC_DE",     8,  &D,      nullptr, &E,      nullptr, &CPU::dec_r1r3 };
 	instruction_table_map[DEC_HL] =     { "DEC_HL",     8,  &H,      nullptr, &L,      nullptr, &CPU::dec_r1r3 };
 	instruction_table_map[DEC_SP] =     { "DEC_SP",     8,  nullptr, nullptr, nullptr, nullptr, &CPU::dec_sp };
- }
+}
 
 // Load the next byte of data to r1 register
 void CPU::ld_r1_n()
@@ -333,7 +412,7 @@ void CPU::ld_r1r3_sp_n()
 {
 	int8_t byte = bus->read_from_memory(++PC);
 	uint16_t result = SP + byte;
-	fill_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
+	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 
 	REG_VAL(one) = result >> 8;
 	REG_VAL(three) = (result << 8) >> 8;
@@ -372,7 +451,7 @@ void CPU::ld_nn_sp()
 void CPU::push_af()
 {
 	bus->write_to_memory(--SP, A.register_value);
-	uint8_t f_register = (F.Z << 7) | (F.N << 6) | (F.H << 5) | (F.C << 4);
+	uint8_t f_register = (F.Z << 3) | (F.N << 2) | (F.H << 1) | F.C;
 	bus->write_to_memory(--SP, f_register);
 
 #if defined DEBUG
@@ -401,9 +480,8 @@ void CPU::push_r1r3()
 void CPU::pop_af()
 {
 	uint8_t f_data = bus->read_from_memory(SP++);
-	//fill_f_register(f_data >> 7, f_data << 1 >> 7, f_data << 2 >> 7, f_data << 3 >> 7);
-	assert(false); // use fill function instead
-	F = { (uint8_t)(f_data >> 7), (uint8_t)(f_data << 1 >> 7), (uint8_t)(f_data << 2 >> 7), (uint8_t)(f_data << 3 >> 7)};
+	set_f_register(f_data & 0x8, f_data & 0x4, f_data & 0x2, f_data & 0x1);
+
 	uint8_t data = bus->read_from_memory(SP++);
 	A.register_value = data;
 
@@ -435,7 +513,7 @@ void CPU::add_r1_r2()
 	uint8_t value_one = REG_VAL(one);
 	uint8_t value_two = REG_VAL(two);
  	uint8_t result = value_one + value_two;
-	fill_f_register(result == 0, 0, is_half_carry(value_one, value_two), is_carry(value_one, value_two));
+	set_f_register(result == 0, 0, is_half_carry(value_one, value_two), is_carry(value_one, value_two));
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -453,7 +531,7 @@ void CPU::add_r1_r2r4()
 	uint8_t data = bus->read_from_memory(memory_address);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = data + register_value;
-	fill_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
+	set_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -470,7 +548,7 @@ void CPU::add_r1_n()
 	uint8_t data = bus->read_from_memory(++PC);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = data + register_value;
-	fill_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
+	set_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -478,6 +556,413 @@ void CPU::add_r1_n()
 	 	        " + 0x" << (uint16_t)data << " = 0x" << (uint16_t)register_value <<
 		        " + 0x" << (uint16_t)data << " = 0x" << (uint16_t)result <<
 		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Add (r2 + Carry flag) to r1 register
+void CPU::adc_r1_r2()
+{	
+	uint8_t carry = F.C;
+	uint8_t value_one = REG_VAL(one);
+	uint8_t value_two = REG_VAL(two);
+	uint8_t result = value_one + value_two + carry;
+    set_f_register(result == 0, 0, is_half_carry(value_one, value_two + carry),
+		           is_carry(value_one, value_two + carry));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " <<  REG_NAME(one) << " = " << REG_NAME(one) << " + " << 
+		        REG_NAME(two) << " + F.C = 0x" << (uint16_t)value_one <<
+		        " + 0x" << (uint16_t)value_two << " + 0x" << (uint16_t)carry <<
+		        " = 0x" <<(uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Add (ADDR[r2r4] + Carry flag) to r1 register
+void CPU::adc_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  register_value = REG_VAL(one);
+	uint8_t  carry = F.C;
+	uint8_t  result = register_value + data + carry;
+	set_f_register(result == 0, 0, is_half_carry(register_value, data + carry), 
+		           is_carry(register_value, data + carry));
+	REG_VAL(one) = result;
+	
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " + " << 
+		        ADDR(memory_address) << " + F.C = 0x" <<(uint16_t)register_value << 
+		        " + 0x"<< (uint16_t)data << " + 0x" << (uint16_t)carry << 
+		        " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Add (n + Carry flag) to r1 register
+void CPU::adc_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t carry = F.C;
+	uint8_t register_value = REG_VAL(one);
+	uint8_t result = register_value + data + carry;
+	set_f_register(result == 0, 0, is_half_carry(register_value, data + carry), 
+		           is_carry(register_value, data + carry));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " + 0x" << 
+		        (uint16_t)data << " + F.C = 0x" << (uint16_t)register_value <<
+		        " + 0x" << (uint16_t)data << " + 0x" << (uint16_t)carry << " = 0x" << 
+		        (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Substract data from r2 register from r1 
+void CPU::sub_r1_r2()
+{
+	uint8_t value_one = REG_VAL(one);
+	uint8_t value_two = REG_VAL(two);
+	uint8_t result = value_one - value_two;
+	set_f_register(result == 0, 1, is_half_borrow(value_one, value_two), is_borrow(value_one, value_two));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " - " << REG_NAME(two) <<
+		        " = 0x" << (uint16_t)value_one << " - 0x" << (uint16_t)value_two <<
+	  	        " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Substract data from ADDR[r2r4] data 
+void CPU::sub_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t data = bus->read_from_memory(memory_address);
+	uint8_t register_value = REG_VAL(one);
+	uint8_t result = register_value - data;
+	set_f_register(result == 0, 1, is_half_borrow(register_value, data), is_borrow(register_value, data));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " - " << ADDR(memory_address) <<
+		        "0x" << (uint16_t)register_value << " - 0x" << (uint16_t)data <<
+		        " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Substract data from next byte of memory from r1 register
+void CPU::sub_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t register_value = REG_VAL(one);
+	uint8_t result = register_value - data; 
+	set_f_register(result == 0, 0, is_half_borrow(register_value, data), is_borrow(register_value, data));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) <<
+		        " - 0x" << (uint16_t)data << " = 0x" << (uint16_t)register_value <<
+		        " - 0x" << (uint16_t)data << " = 0x" << (uint16_t)result <<
+		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Substract (r2 + carry) register from r1
+void CPU::sbc_r1_r2()
+{
+	uint8_t carry = F.C;
+	uint8_t value_one = REG_VAL(one);
+	uint8_t value_two = REG_VAL(two);
+	uint8_t result = value_one - (value_two + carry);
+	set_f_register(result == 0, 0, is_half_borrow(value_one, value_two + carry),
+		           is_borrow(value_one, value_two + carry));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " - (" <<
+		        REG_NAME(two) << " + F.C) = 0x" << (uint16_t)value_one <<
+		        " - (0x" << (uint16_t)value_two << " + 0x" << (uint16_t)carry <<
+		        ") = 0x" << (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Substract (ADDR[r2r4] + Carry) from r1 register
+void CPU::sbc_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  register_value = REG_VAL(one);
+	uint8_t  carry = F.C;
+	uint8_t  result = register_value - (data + carry);
+	set_f_register(result == 0, 0, is_half_borrow(register_value, data + carry),
+	               is_borrow(register_value, data + carry));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " - (" << "ADDR[0x" << 
+		        memory_address << "]" << " + F.C) = 0x" << (uint16_t)register_value <<
+		        " - (0x" << (uint16_t)data << " + 0x" << (uint16_t)carry <<
+		        ") = 0x" << (uint16_t)result << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Substract (n + Carry) from r1 register
+void CPU::sbc_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t carry = F.C;
+	uint8_t register_value = REG_VAL(one);
+	uint8_t result = register_value - (data + carry);
+	set_f_register(result == 0, 0, is_half_borrow(register_value, data + carry),
+		           is_borrow(register_value, data + carry));
+	REG_VAL(one) = result;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " - (0x" <<
+		        (uint16_t)data << " + F.C) = 0x" << (uint16_t)register_value <<
+		        " - (0x" << (uint16_t)data << " + 0x" << (uint16_t)carry << ") = 0x" <<
+	         	(uint16_t)result << F_REG_BITS << "\n";
+#endif
+
+}
+
+
+// Bitwise AND r1 r2 registers
+void CPU::and_r1_r2()
+{
+	REG_VAL(one) &= REG_VAL(two);
+	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
+
+#if DEBUG
+	log_file << ": " << REG_NAME(one) << " &= "<< REG_NAME(two) << " = 0x" << 
+		        (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Bitwise AND r1 ADDR[r2r4]
+void CPU::and_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t data = bus->read_from_memory(memory_address);
+	REG_VAL(one) &= data;
+	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
+	
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " &= " << ADDR(memory_address) <<
+		        REG_NAME(one) << " & 0x" << (uint16_t)data << " = 0x" <<
+		        (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Bitwise AND r1 next byte of memory
+void CPU::and_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	REG_VAL(one) &= data;
+	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " &= 0x" << (uint16_t)data << 
+		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Bitwise OR r1 r2
+void CPU::or_r1_r2()
+{
+	REG_VAL(one) |= REG_VAL(two);
+	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " |= " << REG_NAME(two) << 
+		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Bitwise OR r1 ADDR[r2r4]
+void CPU::or_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t  data = bus->read_from_memory(memory_address);
+	REG_VAL(one) |= data;
+	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " |= " << ADDR(memory_address) <<
+		        REG_NAME(one) << " | " << (uint16_t)data << " = 0x" <<
+		        (uint16_t)REG_VAL(one)<< F_REG_BITS << "\n";
+#endif
+}
+
+
+// Bitwise OR r1 next byte of memory
+void CPU::or_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	REG_VAL(one) |= data;
+	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " |= 0x" << (uint16_t)data <<
+		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Bitwise XOR r1 r2z
+void CPU::xor_r1_r2()
+{
+	REG_VAL(one) ^= REG_VAL(two);
+	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
+
+#if defined DEBUG 
+	log_file << ": " << REG_NAME(one) << " ^= " << REG_NAME(two) <<
+		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+//Bitwise XOR r1 ADDR[r2r4]
+void CPU::xor_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t  data = bus->read_from_memory(memory_address);
+	REG_VAL(one) ^= data;
+	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " ^= " << ADDR(memory_address) <<
+		        REG_NAME(one) << " ^ " << (uint16_t)data << " = 0x" <<
+		        (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Bitwise XOR r1 n
+void CPU::xor_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	REG_VAL(one) ^= data;
+	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " ^= 0x" << (uint16_t)data <<
+		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Compare r1 and r2 registers 
+void CPU::cp_r1_r2()
+{
+	uint8_t result = REG_VAL(one) - REG_VAL(two);
+	set_f_register(result == 0, 1, is_half_borrow(REG_VAL(one), REG_VAL(two)), REG_VAL(one) < REG_VAL(two));
+	
+#if defined DEBUG 
+	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << 
+		        " " << REG_NAME(two) << " = 0x" << (uint16_t)REG_VAL(two) << 
+		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Compare r1 and ADDR[r2r4] 
+void CPU::cp_r1_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  result = REG_VAL(one) - data;
+	set_f_register(result == 0, 1, is_half_borrow(REG_VAL(one), data), REG_VAL(one) < data);
+
+#if defined DEBUG
+	log_file << ": " << REG_VAL(one) << " = 0x" << (uint16_t)REG_VAL(one) << 
+		        ADDR(memory_address) << "0x" << (uint16_t)data << 
+		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Compare r1 and next byte of memory 
+void CPU::cp_r1_n()
+{
+	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t register_value = REG_VAL(one);
+	uint8_t result = register_value - data;
+	set_f_register(result == 0, 1, is_half_borrow(register_value, data), REG_VAL(one) < data);
+
+#if defined DEBUG
+	log_file << ": " << ADDR(PC) << "0x" << (uint16_t)data << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Increments r1 register
+void CPU::inc_r1()
+{
+	set_f_register((uint8_t)(REG_VAL(one) + 1) == 0, 0, is_half_carry(REG_VAL(one), 1), F.C);
+	REG_VAL(one)++;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)(REG_VAL(one) - 1) << 
+		        " -> 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Increment data at ADDR[r2r4]
+void CPU::inc_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t  data = bus->read_from_memory(memory_address);
+	set_f_register((uint8_t)(data + 1) == 0, 0, is_half_carry(data, 1), F.C);
+	data++;
+	bus->write_to_memory(memory_address, data);
+
+#if defined DEBUG
+	log_file << ": " << ADDR(memory_address) << "0x" << (uint16_t)(data - 1) <<
+		        " -> 0x" << (uint16_t)data << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Decrement r1 register
+void CPU::dec_r1()
+{
+	set_f_register((uint8_t)(REG_VAL(one) - 1) == 0, 1, is_half_borrow(REG_VAL(one), 1), F.C);
+	REG_VAL(one)--;
+
+#if defined DEBUG
+	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)(REG_VAL(one) + 1) << 
+		        " -> 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+#endif
+}
+
+
+// Decrement data at ADDR[r2r4]
+void CPU::dec_r2r4()
+{
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint8_t  data = bus->read_from_memory(memory_address);
+	set_f_register((uint8_t)(data - 1) == 0, 0, is_half_borrow(data, 1), F.C);
+	data--;
+	bus->write_to_memory(memory_address, data);
+
+#if defined DEBUG
+	log_file << ": " << ADDR(memory_address) << "0x" << (uint16_t)(uint8_t)(data + 1) <<
+		        " -> 0x" << (uint16_t)data << F_REG_BITS << "\n";
 #endif
 }
 
@@ -515,7 +1000,7 @@ void CPU::add_sp_n()
 {
 	int8_t byte = bus->read_from_memory(++PC);
 	uint16_t result = SP + byte;
-	fill_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
+	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 	
 #if defined DEBUG 
 	log_file << ": SP = 0x" << SP << " + 0x" << (((uint16_t)byte) & 0xFF) <<

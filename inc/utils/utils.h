@@ -12,3 +12,7 @@ bool is_carry(uint8_t value_one, uint16_t value_two);
 bool is_half_carry(int8_t value_one, uint16_t value_two);
 
 bool is_carry(int8_t value_one, uint16_t value_two);
+
+bool is_half_borrow(uint8_t value_one, uint8_t value_two);
+
+bool is_borrow(uint8_t value_one, uint8_t value_two);

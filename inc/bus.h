@@ -1,5 +1,5 @@
-#if !defined BUS_H
-#define BUS_H
+#pragma once
+
 #include <stdint.h>
 #include <vector>
 
@@ -16,4 +16,3 @@ private:
      */
 	uint8_t* ram;
 };
-#endif

@@ -24,7 +24,7 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
-		if (PC == 0x121) return;
+		if (PC == 0x116) return;
 	}
 }
 
@@ -56,7 +56,7 @@ void CPU::execute()
 }
 
 
-void CPU::fill_f_register(bool z, bool n, bool h, bool c)
+void CPU::set_f_register(bool z, bool n, bool h, bool c)
 {
 	F.Z = z;
 	F.N = n;
