@@ -17,10 +17,6 @@ void CPU::init_cb_instruction_table()
 void CPU::swap_r1()
 {
 	uint8_t register_value = REG_VAL(one);
-	uint8_t a = (register_value << 4);
-	uint8_t b = (register_value >> 4);
-	uint8_t c = a | b;
-
 	REG_VAL(one) = (register_value << 4) | (register_value >> 4);
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
@@ -36,11 +32,12 @@ void CPU::swap_r1r3()
 {
 	uint16_t register_value = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	REG_VAL(one) = register_value & 0x00FF;
-	REG_VAL(three) = register_value & 0xFF00;
+	REG_VAL(three) = (register_value & 0xFF00) >> 8;
 	set_f_register(combine_two_bytes(REG_VAL(one), REG_VAL(three)), 0, 0, 0);
 
 #if defined DEBUG
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = 0x" << register_value <<
-		        " -> 0x" << REG_VAL(one) << REG_VAL(three) << F_REG_BITS << "\n";
+		        " -> 0x" << combine_two_bytes(REG_VAL(one), REG_VAL(three)) << 
+		        F_REG_BITS << "\n";
 #endif
 }
