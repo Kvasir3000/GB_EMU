@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include <cassert>
-#include "utils/debug.h"
 
 void CPU::init_instruction_table()
 {
@@ -190,6 +189,10 @@ void CPU::init_instruction_table()
 	instruction_table_map[DEC_H] =      { "DEC_H",      4,  &H,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_L] =      { "DEC_A",      4,  &L,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_HL_A] =   { "DEC_[HL]",   12, nullptr, &H,      nullptr, &L,      &CPU::dec_r2r4 };
+	instruction_table_map[ADD_HL_BC] =  { "ADD_HL_BC",  8,  &H,      &B,      &L,      &C,      &CPU::add_r1r3_r2r4 };
+	instruction_table_map[ADD_HL_DE] =  { "ADD_HL_DE",  8,  &H,      &D,      &L,      &E,      &CPU::add_r1r3_r2r4 };
+	instruction_table_map[ADD_HL_HL] =  { "ADD_HL_HL",  8,  &H,      &H,      &L,      &L,      &CPU::add_r1r3_r2r4 };
+	instruction_table_map[ADD_HL_SP] =  { "ADD_HL_SP",  8,  &H,      nullptr, &L,      nullptr, &CPU::add_r1r3_sp };
 	instruction_table_map[ADD_SP_n] =   { "ADD_SP_n",   16, nullptr, nullptr, nullptr, nullptr, &CPU::add_sp_n };
 	instruction_table_map[INC_BC] =     { "INC_BC",     8,  &B,      nullptr, &C,      nullptr, &CPU::inc_r1r3 };
 	instruction_table_map[INC_DE] =     { "INC_DE",     8,  &D,      nullptr, &E,      nullptr, &CPU::inc_r1r3 };
@@ -410,7 +413,7 @@ void CPU::ld_sp_r1r3()
 // Load sp + n to 16-bit r1r3 register
 void CPU::ld_r1r3_sp_n()
 {
-	int8_t byte = bus->read_from_memory(++PC);
+	uint8_t byte = bus->read_from_memory(++PC);
 	uint16_t result = SP + byte;
 	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 
@@ -967,6 +970,39 @@ void CPU::dec_r2r4()
 }
 
 
+// ADD 16-bit r2r4 registe to r1r3 register
+void CPU::add_r1r3_r2r4()
+{
+	uint16_t register_one = combine_two_bytes(REG_VAL(one), REG_VAL(three));
+	uint16_t register_two = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	uint16_t result = register_one + register_two;
+	set_f_register(F.Z, 0, is_half_carry_16_bit(register_one, register_two), is_carry_16_bit(register_one, register_two));
+	REG_VAL(one) = result & 0xFF00;
+	REG_VAL(three) = result & 0xFF;
+
+#if defined DEBUG 
+	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = " << REG_NAME(one) + REG_NAME(three) <<
+		        " + " << REG_NAME(two) + REG_NAME(four) << " = 0x" << register_one <<
+		        " + 0x" << register_two << " = 0x" << result << F_REG_BITS << "\n";
+#endif
+}
+
+// Add SP register to 16-bit r1r3 register 
+void CPU::add_r1r3_sp()
+{
+	uint16_t register_one = combine_two_bytes(REG_VAL(one), REG_VAL(three));
+	uint16_t result = register_one + SP;
+	set_f_register(F.Z, 0, is_half_carry_16_bit(register_one, SP), is_carry_16_bit(register_one, SP));
+	REG_VAL(one) = result & 0xFF00;
+	REG_VAL(three) = result & 0xFF;
+
+#if defined DEBUG 
+	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = " << REG_NAME(one) + REG_NAME(three) <<
+		        " + SP" << " = 0x" << register_one << " + 0x" << SP << " = 0x" << 
+		        result << F_REG_BITS << "\n";
+#endif
+};
+
 // Load data from address[$FF00 + C] to register A. $FF00 - $FF7F IO ports range addresses  
 void CPU::ld_a_c_io()
 {
@@ -998,7 +1034,7 @@ void CPU::ld_c_a_io()
 // Add the next byte of memory to SP register
 void CPU::add_sp_n()
 {
-	int8_t byte = bus->read_from_memory(++PC);
+	uint8_t byte = bus->read_from_memory(++PC);
 	uint16_t result = SP + byte;
 	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 	

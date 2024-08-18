@@ -217,6 +217,11 @@ enum OPCODE
 	DEC_L = 0x2D,
 	DEC_HL_A = 0x35,
 
+	ADD_HL_BC = 0x09,
+	ADD_HL_DE = 0x19,
+    ADD_HL_HL = 0x29,
+	ADD_HL_SP = 0x39,
+
 	ADD_SP_n = 0xE8,
 
 	INC_BC = 0x03,

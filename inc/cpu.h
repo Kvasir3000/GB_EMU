@@ -6,7 +6,9 @@
 #include <iomanip>
 #include "bus.h"
 #include "utils/utils.h"
+#include "utils/debug.h"
 #include "opcodes.h"
+#include "cb_opcodes.h"
 
 class CPU
 {
@@ -63,9 +65,12 @@ private:
 
 	uint8_t current_opcode;
 	INSTRUCTION current_instruction;
+	bool cb_instruction;
 
 	INSTRUCTION instruction_table_map[0xFF];
+	INSTRUCTION cb_instruction_table_map[0xFF];
 	void init_instruction_table();
+	void init_cb_instruction_table();
 
 #if defined DEBUG
 	std::ofstream log_file;
@@ -128,9 +133,16 @@ private:
 	void inc_r2r4();
 	void dec_r1();
 	void dec_r2r4();
+	void add_r1r3_r2r4();
+	void add_r1r3_sp();
 	void add_sp_n();
 	void inc_r1r3();
 	void inc_sp();
 	void dec_r1r3();
 	void dec_sp();
+
+
+	// CB instructions
+	void swap_r1();
+	void swap_r1r3();
 };

@@ -10,6 +10,7 @@ set( SOURCES
 	src/main.cpp
 	src/cpu/cpu.cpp
 	src/cpu/opcodes.cpp
+	src/cpu/cb_opcodes.cpp
 	src/bus.cpp
 	src/utils/utils.cpp
 )
