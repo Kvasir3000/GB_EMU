@@ -48,6 +48,8 @@ private:
 	uint16_t PC;
 	uint16_t SP;
 
+	bool IME;
+
 	BUS* bus;
 
 	struct INSTRUCTION
@@ -79,6 +81,7 @@ private:
 	void fetch_opcode();
 	void decode_instruction();
 	void execute();
+	bool halted;
 
 
 	void ld_r1_n();
@@ -140,7 +143,17 @@ private:
 	void inc_sp();
 	void dec_r1r3();
 	void dec_sp();
-
+	void daa();
+	void cpl();
+	void ccf();
+	void scf();
+	void nop();
+	void halt();
+	void stop();
+	void di();
+	void ei();
+	void rlca();
+	void rla();
 
 	// CB instructions
 	void swap_r1();

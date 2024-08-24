@@ -13,6 +13,7 @@ CPU::CPU(BUS* bus)
 	L.register_name = "L";
 	F = { 0, 0, 0, 0, 0};
 	cb_instruction = false;
+	halted = false;
 
 	init_instruction_table();
 	init_cb_instruction_table();
@@ -26,15 +27,18 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
-		if (PC == 0x11E) return;
+		if (PC == 0x10B) return;
 	}
 }
 
 void CPU::tick()
 {
-	fetch_opcode();
-	decode_instruction();
-	execute();
+	if (!halted)
+	{
+		fetch_opcode();
+		decode_instruction();
+		execute();
+	}
 }
 
 void CPU::fetch_opcode()

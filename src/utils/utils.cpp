@@ -15,15 +15,15 @@ bool is_carry(uint8_t value_one, uint16_t value_two)
 	return (((value_one & 0xFF) + (value_two & 0xFF)) & 0x100) == 0x100;
 }
 
-//bool is_half_carry(int8_t value_one, uint16_t value_two)
-//{
-//	return (((value_one & 0x0F) + (value_two & 0x0F)) & 0x10) == 0x10;
-//}
-//
-//bool is_carry(int8_t value_one, uint16_t value_two)
-//{
-//	return (((value_one & 0xFF) + (value_two & 0xFF)) & 0x100) == 0x100;
-//}
+bool is_half_carry(int8_t value_one, uint16_t value_two)
+{
+	return (((value_one & 0x0F) + (value_two & 0x0F)) & 0x10) == 0x10;
+}
+
+bool is_carry(int8_t value_one, uint16_t value_two)
+{
+	return (((value_one & 0xFF) + (value_two & 0xFF)) & 0x100) == 0x100;
+}
 
 bool is_half_borrow(uint8_t value_one, uint8_t value_two)
 {

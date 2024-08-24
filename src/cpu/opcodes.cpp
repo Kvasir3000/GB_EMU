@@ -202,6 +202,16 @@ void CPU::init_instruction_table()
 	instruction_table_map[DEC_DE] =     { "DEC_DE",     8,  &D,      nullptr, &E,      nullptr, &CPU::dec_r1r3 };
 	instruction_table_map[DEC_HL] =     { "DEC_HL",     8,  &H,      nullptr, &L,      nullptr, &CPU::dec_r1r3 };
 	instruction_table_map[DEC_SP] =     { "DEC_SP",     8,  nullptr, nullptr, nullptr, nullptr, &CPU::dec_sp };
+	instruction_table_map[DAA] =        { "DAA",        4,  nullptr, nullptr, nullptr, nullptr, &CPU::daa };
+	instruction_table_map[CPL] =        { "CPL",        4,  nullptr, nullptr, nullptr, nullptr, &CPU::cpl };
+	instruction_table_map[CCF] =        { "CCF",        4,  nullptr, nullptr, nullptr, nullptr, &CPU::ccf };
+	instruction_table_map[SCF] =        { "SCF",        4,  nullptr, nullptr, nullptr, nullptr, &CPU::scf };
+	instruction_table_map[NOP] =	    { "NOP",        4,  nullptr, nullptr, nullptr, nullptr, &CPU::nop };
+	instruction_table_map[HALT] =       { "HALT",       4,  nullptr, nullptr, nullptr, nullptr, &CPU::halt };
+	instruction_table_map[STOP] =       { "STOP",       4,  nullptr, nullptr, nullptr, nullptr, &CPU::stop };
+	instruction_table_map[DI] =         { "DI",         4,  nullptr, nullptr, nullptr, nullptr, &CPU::di };
+	instruction_table_map[EI] =         { "EI",         4,  nullptr, nullptr, nullptr, nullptr, &CPU::ei };
+
 }
 
 // Load the next byte of data to r1 register
@@ -515,7 +525,7 @@ void CPU::add_r1_r2()
 {
 	uint8_t value_one = REG_VAL(one);
 	uint8_t value_two = REG_VAL(two);
- 	uint8_t result = value_one + value_two;
+ 	int8_t result = value_one + value_two;
 	set_f_register(result == 0, 0, is_half_carry(value_one, value_two), is_carry(value_one, value_two));
 	REG_VAL(one) = result;
 
@@ -1096,4 +1106,149 @@ void CPU::dec_sp()
 #if defined DEBUG
 	log_file << ": SP = 0x" << SP + 1 << " -> 0x" << SP << "\n";
 #endif
+}
+
+
+// Adjusting A register for correct representation of BCD
+void CPU::daa()
+{
+	uint8_t register_value = A.register_value;
+	uint8_t correction_value = 0x00;
+	if (F.H || ((register_value & 0x0F) > 0x9))
+	{
+		correction_value |= 0x6;
+	}
+
+	if (F.C || (((register_value & 0xF0) >> 4) > 0x9))
+	{
+		correction_value |= 0x60;
+	}
+
+	if (F.N)
+	{
+		A.register_value -= correction_value;
+	}
+	else
+	{
+		A.register_value += correction_value;
+	}
+
+	set_f_register(A.register_value == 0, F.N, 0, is_carry(register_value, correction_value));
+
+#if defined DEBUG
+	log_file << ": A = 0x" <<(uint16_t)register_value << " -> 0x" << (uint16_t)A.register_value <<
+		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Complement A register
+void CPU::cpl()
+{
+	A.register_value = ~A.register_value;
+	set_f_register(F.Z, 1, 1, F.C);
+
+#if defined DEBUG
+	log_file << ": A = 0x" << (uint16_t)(~A.register_value) << " -> 0x" << (uint16_t)A.register_value <<
+		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Complement carry flag 
+void CPU::ccf()
+{
+	F.C = F.C ? 0 : 1;
+	set_f_register(F.Z, 0, 0, F.C);
+
+#if defined DEBUG 
+	log_file << ": F.C = 0x" << (uint16_t)(F.C ? 0 : 1) << " -> 0x" << (uint16_t)F.C <<
+		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Set carry flag
+void CPU::scf()
+{
+	set_f_register(F.Z, 0, 0, 1);
+
+#if defined DEBUG
+	log_file << ": " << F_REG_BITS << "\n";
+#endif
+}
+
+
+// No operation
+void CPU::nop()
+{
+
+#if defined DEBUG
+	log_file << "\n";
+#endif
+}
+
+
+// Halt CPU untill interrupt
+void CPU::halt()
+{
+	halted = true;
+
+#if defined DEBUG
+	log_file << "\n";
+#endif
+}
+
+
+// Halt CPU & LCD until button pressed
+void CPU::stop()
+{
+	assert(false); // Implement this later
+
+#if defined DEBUG
+	log_file << "\n";
+#endif
+}
+
+
+// Disable interrupt
+void CPU::di()
+{
+	IME = false;
+
+#if defined DEBUG
+	log_file << "\n";
+#endif
+}
+
+
+// Enable interrupt
+void CPU::ei()
+{
+	IME = true;
+
+#if defined DEBUG
+	log_file << "\n";
+#endif
+}
+
+
+// Rotate A register left, put bit 7 into C register
+void CPU::rlca()
+{
+	uint8_t register_value = A.register_value;
+	A.register_value = (register_value << 1) | (register_value >> 7);
+	set_f_register(A.register_value == 0, 0, 0, register_value & 0x80);
+
+#if defined DEBUG
+	log_file << ": A = 0x" << register_value << " -> 0x" << A.register_value <<
+		        F_REG_BITS << "\n";
+#endif
+}
+
+
+// Rotate
+void CPU::rla()
+{
+
 }
