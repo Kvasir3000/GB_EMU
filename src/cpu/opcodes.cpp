@@ -211,37 +211,43 @@ void CPU::init_instruction_table()
 	instruction_table_map[STOP] =       { "STOP",       4,  nullptr, nullptr, nullptr, nullptr, &CPU::stop };
 	instruction_table_map[DI] =         { "DI",         4,  nullptr, nullptr, nullptr, nullptr, &CPU::di };
 	instruction_table_map[EI] =         { "EI",         4,  nullptr, nullptr, nullptr, nullptr, &CPU::ei };
-
+	instruction_table_map[RLCA] =       { "RLCA",       4,  &A,      nullptr, nullptr, nullptr, &CPU::rlc_r1 };
+	instruction_table_map[RLA] =        { "RLA",        4,  &A,      nullptr, nullptr, nullptr, &CPU::rl_r1 };
+	instruction_table_map[RRCA] =       { "RRCA",       4,  &A,      nullptr, nullptr, nullptr, &CPU::rrc_r1 };
+	instruction_table_map[RRA] =        { "RRA",        4,  &A,      nullptr, nullptr, nullptr, &CPU::rr_r1 };
 }
+
 
 // Load the next byte of data to r1 register
 void CPU::ld_r1_n()
 {
-	REG_VAL(one) = bus->read_from_memory(++PC);
+	REG_VAL(one) = bus->read_memory(++PC);
 
 #if defined DEBUG
 	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 
+
 // Load data from memory address stored at next 2-bytes of memory to r1 register
 void CPU::ld_r1_nn()
 {
-	uint16_t memory_addr = (bus->read_from_memory(++PC)) | (bus->read_from_memory(++PC) << 8);
-	REG_VAL(one) = bus->read_from_memory(memory_addr);
+	uint16_t memory_address = (bus->read_memory(++PC)) | (bus->read_memory(++PC) << 8);
+	REG_VAL(one) = bus->read_memory(memory_address);
 
 #if defined DEBUG
-	log_file << ": " << REG_NAME(one) << "= " << ADDR(memory_addr) << 
+	log_file << ": " << REG_NAME(one) << "= " << ADDR(memory_address) <<
 		        (uint16_t)REG_VAL(one) << "\n";
 #endif 
 }
 
+
 // Load data from memory address $FF00 + n to r1 register. $FF00 - $FF7F IO ports range addresses
 void CPU::ldh_r1_n()
 {
-	uint8_t  memory_offset = bus->read_from_memory(++PC);
+	uint8_t  memory_offset = bus->read_memory(++PC);
 	uint16_t memory_address = 0xFF00 + memory_offset;
-	REG_VAL(one) = bus->read_from_memory(memory_address);
+	REG_VAL(one) = bus->read_memory(memory_address);
 
 #if defined DEBUG
 	log_file << ": " << REG_NAME(one) << " = ADDR[0xFF00 + 0x" <<
@@ -249,6 +255,7 @@ void CPU::ldh_r1_n()
 		        (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
+
 
 // Load data from r2 to r1 register
 void CPU::ld_r1_r2()
@@ -261,17 +268,19 @@ void CPU::ld_r1_r2()
 #endif
 }
 
+
 // Load data from memory address stored in 16-bit r2r4 register to r1 register
 void CPU::ld_r1_r2r4()
 {
-	uint16_t memory_addr = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	REG_VAL(one) = bus->read_from_memory(memory_addr);
+	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
+	REG_VAL(one) = bus->read_memory(memory_address);
 
 #if defined DEBUG
-	log_file << ": " << REG_NAME(one) << " = " << ADDR(memory_addr) <<
+	log_file << ": " << REG_NAME(one) << " = " << ADDR(memory_address) <<
 		        "0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
+
 
 // Load data from memory address stored in 16-bit r2r4 register to r1 register and decrement r2r4
 void CPU::ldd_r1_r2r4()
@@ -290,6 +299,7 @@ void CPU::ldd_r1_r2r4()
 	dec_r1r3();
 }
 
+
 // Load data from memory address stored at 16-bit r2r4 register to r1 register and decrement r2r4
 void CPU::ldi_r1_r2r4()
 {
@@ -307,17 +317,19 @@ void CPU::ldi_r1_r2r4()
 	inc_r1r3();
 }
 
+
 // Load data from r register to memory address stored at 16-bit r1r3 register
 void CPU::ld_r1r3_r2()
 {
 	uint16_t memory_addr = combine_two_bytes(REG_VAL(one), REG_VAL(three));
-	bus->write_to_memory(memory_addr, REG_VAL(two));
+	bus->write_memory(memory_addr, REG_VAL(two));
 
 #if defined DEBUG
 	log_file << ": " << ADDR(memory_addr) << REG_VAL(two) << 
 		        " = 0x" << (uint16_t)REG_VAL(two) << "\n";
 #endif
 }
+
 
 // Load data from r2 register to memory address stored at 16-bit r1r3 register and decrement r1r3
 void CPU::ldd_r1r3_r2()
@@ -332,6 +344,7 @@ void CPU::ldd_r1r3_r2()
 	dec_r1r3();
 }
 
+
 // Load data from r2 register to memory address stored at 16-bit r1r3 register and increment r1r3
 void CPU::ldi_r1r3_r2()
 {
@@ -345,23 +358,24 @@ void CPU::ldi_r1r3_r2()
 	inc_r1r3();
 }
 
+
 // Load data from next byte to memory address stored at 16-bit r1r3 register
 void CPU::ld_r1r3_n()
 {
 	uint16_t memory_addr = combine_two_bytes(REG_VAL(one), REG_VAL(three));
-	uint8_t  data = bus->read_from_memory(++PC);
-	bus->write_to_memory(memory_addr, data);
+	uint8_t  data = bus->read_memory(++PC);
+	bus->write_memory(memory_addr, data);
 
 #if defined DEBUG
-	log_file << ": " << ADDR(memory_addr) << (uint16_t)data << "\n";
+	log_file << ": " << ADDR(memory_addr) << "0x" << (uint16_t)data << "\n";
 #endif
 }
 
 // Load data from register r1 to memory address stored at next 2-bytes 
 void CPU::ld_nn_r1()
 {
-	uint16_t memory_addr = (bus->read_from_memory(++PC)) | (bus->read_from_memory(++PC) << 8);
-	bus->write_to_memory(memory_addr, REG_VAL(one));
+	uint16_t memory_addr = (bus->read_memory(++PC)) | (bus->read_memory(++PC) << 8);
+	bus->write_memory(memory_addr, REG_VAL(one));
 
 #if defined DEBUG
 	log_file << ": " << ADDR(memory_addr) << REG_NAME(one) <<
@@ -369,12 +383,13 @@ void CPU::ld_nn_r1()
 #endif
 }
 
+
 // Load data from r1 register to memory address $FF00 + n. $FF00 - $FF7F IO ports range addresses
 void CPU::ldh_n_r1()
 {
-	uint8_t  address_offset = bus->read_from_memory(++PC);
+	uint8_t  address_offset = bus->read_memory(++PC);
 	uint16_t memory_address = 0xFF00 + address_offset;
-	bus->write_to_memory(memory_address, REG_VAL(one));
+	bus->write_memory(memory_address, REG_VAL(one));
 
 #if defined DEBUG
 	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = " << 
@@ -383,11 +398,12 @@ void CPU::ldh_n_r1()
 #endif
 }
 
+
 // Load data from next two bytes of memory to 16-bit r1r3 register
 void CPU::ld_r1r3_nn()
 {
-	REG_VAL(three) = bus->read_from_memory(++PC);
-	REG_VAL(one) = bus->read_from_memory(++PC);
+	REG_VAL(three) = bus->read_memory(++PC);
+	REG_VAL(one) = bus->read_memory(++PC);
 
 #if defined DEBUG
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = 0x" << 
@@ -395,11 +411,12 @@ void CPU::ld_r1r3_nn()
 #endif
 }
 
+
 // Load data from next two bytes of memory to 16-bit sp register
 void CPU::ld_sp_nn()
 {
-	uint8_t low_byte = bus->read_from_memory(++PC);
-	uint8_t high_byte = bus->read_from_memory(++PC);
+	uint8_t low_byte = bus->read_memory(++PC);
+	uint8_t high_byte = bus->read_memory(++PC);
 
 	SP = combine_two_bytes(high_byte, low_byte);
 
@@ -423,7 +440,7 @@ void CPU::ld_sp_r1r3()
 // Load sp + n to 16-bit r1r3 register
 void CPU::ld_r1r3_sp_n()
 {
-	uint8_t byte = bus->read_from_memory(++PC);
+	uint8_t byte = bus->read_memory(++PC);
 	uint16_t result = SP + byte;
 	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 
@@ -441,21 +458,21 @@ void CPU::ld_r1r3_sp_n()
 // Load data from 16-bit SP register to memory address nn
 void CPU::ld_nn_sp()
 {
-	uint8_t low_byte = bus->read_from_memory(++PC);
-	uint8_t high_byte = bus->read_from_memory(++PC);
+	uint8_t low_byte = bus->read_memory(++PC);
+	uint8_t high_byte = bus->read_memory(++PC);
 	uint16_t memory_address = combine_two_bytes(high_byte, low_byte);
 
-	bus->write_to_memory(memory_address, SP & 0x00FF);
-	bus->write_to_memory(++memory_address, (SP & 0xFF00) >> 8);
+	bus->write_memory(memory_address, SP & 0x00FF);
+	bus->write_memory(++memory_address, (SP & 0xFF00) >> 8);
 
 	
 #if defined DEBUG
 	uint16_t memory_address_1 = --memory_address;
 	uint16_t memory_address_2 = ++memory_address;
 	log_file << ": " << ADDR(memory_address_1) << "0x" <<
-		        (uint16_t)bus->read_from_memory(memory_address_1) << "(SP_LOW)\n\t\t\t\t " <<
+		        (uint16_t)bus->read_memory(memory_address_1) << "(SP_LOW)\n\t\t\t\t " <<
 		        ADDR(memory_address_2) << "0x" <<
-		        (uint16_t)bus-> read_from_memory(memory_address_2) << "(SP_HIGH)\n";
+		        (uint16_t)bus-> read_memory(memory_address_2) << "(SP_HIGH)\n";
 #endif
 }
 
@@ -463,9 +480,9 @@ void CPU::ld_nn_sp()
 // Push AF register to stack
 void CPU::push_af()
 {
-	bus->write_to_memory(--SP, A.register_value);
+	bus->write_memory(--SP, A.register_value);
 	uint8_t f_register = (F.Z << 3) | (F.N << 2) | (F.H << 1) | F.C;
-	bus->write_to_memory(--SP, f_register);
+	bus->write_memory(--SP, f_register);
 
 #if defined DEBUG
 	log_file << ": " << ADDR_SP(SP + 1) << "A = 0x" << (uint16_t)A.register_value <<
@@ -478,8 +495,8 @@ void CPU::push_af()
 // Push r1r3 register to stack
 void CPU::push_r1r3()
 {
-	bus->write_to_memory(--SP, REG_VAL(one));
-	bus->write_to_memory(--SP, REG_VAL(three));
+	bus->write_memory(--SP, REG_VAL(one));
+	bus->write_memory(--SP, REG_VAL(three));
 
 #if defined DEBUG
 	log_file << ": " << ADDR_SP(SP + 1) << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << 
@@ -492,10 +509,10 @@ void CPU::push_r1r3()
 // Pop AF registers from stack
 void CPU::pop_af()
 {
-	uint8_t f_data = bus->read_from_memory(SP++);
+	uint8_t f_data = bus->read_memory(SP++);
 	set_f_register(f_data & 0x8, f_data & 0x4, f_data & 0x2, f_data & 0x1);
 
-	uint8_t data = bus->read_from_memory(SP++);
+	uint8_t data = bus->read_memory(SP++);
 	A.register_value = data;
 
 #if defined DEBUG
@@ -509,8 +526,8 @@ void CPU::pop_af()
 // Pop 16-bit r1r3 register from stack
 void CPU::pop_r1r3()
 {
-	REG_VAL(three) = bus->read_from_memory(SP++);
-	REG_VAL(one) = bus->read_from_memory(SP++);
+	REG_VAL(three) = bus->read_memory(SP++);
+	REG_VAL(one) = bus->read_memory(SP++);
 
 #if defined DEBUG
 	log_file << ": " << REG_NAME(three) << " = " << ADDR_SP(SP - 2) << "0x" << 
@@ -541,7 +558,7 @@ void CPU::add_r1_r2()
 void CPU::add_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t data = bus->read_from_memory(memory_address);
+	uint8_t data = bus->read_memory(memory_address);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = data + register_value;
 	set_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
@@ -558,7 +575,7 @@ void CPU::add_r1_r2r4()
 // Add data from next byte of memory to r1 register
 void CPU::add_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = data + register_value;
 	set_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
@@ -597,7 +614,7 @@ void CPU::adc_r1_r2()
 void CPU::adc_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  data = bus->read_memory(memory_address);
 	uint8_t  register_value = REG_VAL(one);
 	uint8_t  carry = F.C;
 	uint8_t  result = register_value + data + carry;
@@ -617,7 +634,7 @@ void CPU::adc_r1_r2r4()
 // Add (n + Carry flag) to r1 register
 void CPU::adc_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	uint8_t carry = F.C;
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = register_value + data + carry;
@@ -655,7 +672,7 @@ void CPU::sub_r1_r2()
 void CPU::sub_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t data = bus->read_from_memory(memory_address);
+	uint8_t data = bus->read_memory(memory_address);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = register_value - data;
 	set_f_register(result == 0, 1, is_half_borrow(register_value, data), is_borrow(register_value, data));
@@ -672,7 +689,7 @@ void CPU::sub_r1_r2r4()
 // Substract data from next byte of memory from r1 register
 void CPU::sub_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = register_value - data; 
 	set_f_register(result == 0, 0, is_half_borrow(register_value, data), is_borrow(register_value, data));
@@ -711,7 +728,7 @@ void CPU::sbc_r1_r2()
 void CPU::sbc_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  data = bus->read_memory(memory_address);
 	uint8_t  register_value = REG_VAL(one);
 	uint8_t  carry = F.C;
 	uint8_t  result = register_value - (data + carry);
@@ -731,7 +748,7 @@ void CPU::sbc_r1_r2r4()
 // Substract (n + Carry) from r1 register
 void CPU::sbc_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	uint8_t carry = F.C;
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = register_value - (data + carry);
@@ -766,7 +783,7 @@ void CPU::and_r1_r2()
 void CPU::and_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t data = bus->read_from_memory(memory_address);
+	uint8_t data = bus->read_memory(memory_address);
 	REG_VAL(one) &= data;
 	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
 	
@@ -781,7 +798,7 @@ void CPU::and_r1_r2r4()
 // Bitwise AND r1 next byte of memory
 void CPU::and_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	REG_VAL(one) &= data;
 	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
 
@@ -809,7 +826,7 @@ void CPU::or_r1_r2()
 void CPU::or_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  data = bus->read_memory(memory_address);
 	REG_VAL(one) |= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
@@ -824,7 +841,7 @@ void CPU::or_r1_r2r4()
 // Bitwise OR r1 next byte of memory
 void CPU::or_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	REG_VAL(one) |= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
@@ -852,7 +869,7 @@ void CPU::xor_r1_r2()
 void CPU::xor_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  data = bus->read_memory(memory_address);
 	REG_VAL(one) ^= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
@@ -867,7 +884,7 @@ void CPU::xor_r1_r2r4()
 // Bitwise XOR r1 n
 void CPU::xor_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	REG_VAL(one) ^= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
@@ -896,7 +913,7 @@ void CPU::cp_r1_r2()
 void CPU::cp_r1_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  data = bus->read_memory(memory_address);
 	uint8_t  result = REG_VAL(one) - data;
 	set_f_register(result == 0, 1, is_half_borrow(REG_VAL(one), data), REG_VAL(one) < data);
 
@@ -911,7 +928,7 @@ void CPU::cp_r1_r2r4()
 // Compare r1 and next byte of memory 
 void CPU::cp_r1_n()
 {
-	uint8_t data = bus->read_from_memory(++PC);
+	uint8_t data = bus->read_memory(++PC);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = register_value - data;
 	set_f_register(result == 0, 1, is_half_borrow(register_value, data), REG_VAL(one) < data);
@@ -939,10 +956,10 @@ void CPU::inc_r1()
 void CPU::inc_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  data = bus->read_memory(memory_address);
 	set_f_register((uint8_t)(data + 1) == 0, 0, is_half_carry(data, 1), F.C);
 	data++;
-	bus->write_to_memory(memory_address, data);
+	bus->write_memory(memory_address, data);
 
 #if defined DEBUG
 	log_file << ": " << ADDR(memory_address) << "0x" << (uint16_t)(data - 1) <<
@@ -968,10 +985,10 @@ void CPU::dec_r1()
 void CPU::dec_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
-	uint8_t  data = bus->read_from_memory(memory_address);
+	uint8_t  data = bus->read_memory(memory_address);
 	set_f_register((uint8_t)(data - 1) == 0, 0, is_half_borrow(data, 1), F.C);
 	data--;
-	bus->write_to_memory(memory_address, data);
+	bus->write_memory(memory_address, data);
 
 #if defined DEBUG
 	log_file << ": " << ADDR(memory_address) << "0x" << (uint16_t)(uint8_t)(data + 1) <<
@@ -980,7 +997,7 @@ void CPU::dec_r2r4()
 }
 
 
-// ADD 16-bit r2r4 registe to r1r3 register
+// ADD 16-bit r2r4 register to r1r3 register
 void CPU::add_r1r3_r2r4()
 {
 	uint16_t register_one = combine_two_bytes(REG_VAL(one), REG_VAL(three));
@@ -1017,7 +1034,7 @@ void CPU::add_r1r3_sp()
 void CPU::ld_a_c_io()
 {
 	uint16_t memory_address = 0xFF00 + REG_VAL(two);
-	REG_VAL(one) = bus->read_from_memory(memory_address);
+	REG_VAL(one) = bus->read_memory(memory_address);
 
 #if defined DEBUG
 	log_file << ": " << REG_NAME(one) << " = ADDR[0xFF00 + " << REG_NAME(two) <<
@@ -1031,7 +1048,7 @@ void CPU::ld_c_a_io()
 {
 	uint16_t memory_address = 0xFF00 + REG_VAL(one);
 	uint8_t  data = REG_VAL(two);
-	bus->write_to_memory(memory_address, data);
+	bus->write_memory(memory_address, data);
 
 #if defined DEBUG
 	log_file << ": ADDR[0xFF00 + " << REG_NAME(one) <<"] =" << 
@@ -1044,7 +1061,7 @@ void CPU::ld_c_a_io()
 // Add the next byte of memory to SP register
 void CPU::add_sp_n()
 {
-	uint8_t byte = bus->read_from_memory(++PC);
+	uint8_t byte = bus->read_memory(++PC);
 	uint16_t result = SP + byte;
 	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
 	
@@ -1158,8 +1175,7 @@ void CPU::cpl()
 // Complement carry flag 
 void CPU::ccf()
 {
-	F.C = F.C ? 0 : 1;
-	set_f_register(F.Z, 0, 0, F.C);
+	set_f_register(F.Z, 0, 0, F.C ? 0 : 1);
 
 #if defined DEBUG 
 	log_file << ": F.C = 0x" << (uint16_t)(F.C ? 0 : 1) << " -> 0x" << (uint16_t)F.C <<
@@ -1193,6 +1209,7 @@ void CPU::nop()
 void CPU::halt()
 {
 	halted = true;
+	assert(false); // Check how this instruction should be working
 
 #if defined DEBUG
 	log_file << "\n";
@@ -1233,22 +1250,4 @@ void CPU::ei()
 }
 
 
-// Rotate A register left, put bit 7 into C register
-void CPU::rlca()
-{
-	uint8_t register_value = A.register_value;
-	A.register_value = (register_value << 1) | (register_value >> 7);
-	set_f_register(A.register_value == 0, 0, 0, register_value & 0x80);
 
-#if defined DEBUG
-	log_file << ": A = 0x" << register_value << " -> 0x" << A.register_value <<
-		        F_REG_BITS << "\n";
-#endif
-}
-
-
-// Rotate
-void CPU::rla()
-{
-
-}

@@ -152,10 +152,24 @@ private:
 	void stop();
 	void di();
 	void ei();
-	void rlca();
-	void rla();
 
 	// CB instructions
 	void swap_r1();
 	void swap_r1r3();
+	template <typename BIT_OPERATION> void register_bit_shift(BIT_OPERATION bit_operation, uint8_t carry_bit);
+	template <typename BIT_OPERATION> void memory_data_bit_shift(BIT_OPERATION bit_operation, uint8_t carry_bit);
+	void rlc_r1();
+	void rlc_r1r3();
+	void rl_r1();
+	void rl_r1r3();
+	void rrc_r1();
+	void rrc_r1r3();
+	void rr_r1();
+	void rr_r1r3();
+	void sla_r1();
+	void sla_r1r3();
+	void sra_r1();
+	void sra_r1r3();
+	void srl_r1();
+	void srl_r1r3();
 };

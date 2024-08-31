@@ -27,7 +27,7 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
-		if (PC == 0x10B) return;
+		if (PC == 0x106) return;
 	}
 }
 
@@ -43,10 +43,10 @@ void CPU::tick()
 
 void CPU::fetch_opcode()
 {
-	current_opcode = bus->read_from_memory(PC);
+	current_opcode = bus->read_memory(PC);
 	if (current_opcode == 0xCB)
 	{
-		current_opcode = bus->read_from_memory(++PC);
+		current_opcode = bus->read_memory(++PC);
 		cb_instruction = true;
 	}
 };

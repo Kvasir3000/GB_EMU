@@ -6,6 +6,7 @@
 #include "cpu.h"
 #include "bus.h"
 
+
 void read_cpu_program(std::vector<uint8_t>&program_data)
 {
     std::string test_path = "../tests/cpu/Blarggs/01-special.gb";

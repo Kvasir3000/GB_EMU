@@ -246,4 +246,6 @@ enum OPCODE
 
 	RLCA = 0x07,
 	RLA = 0x17,
+	RRCA = 0x0F,
+	RRA = 0x1F,
 };
