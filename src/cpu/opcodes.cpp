@@ -946,8 +946,7 @@ void CPU::inc_r1()
 	REG_VAL(one)++;
 
 #if defined DEBUG
-	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)(REG_VAL(one) - 1) << 
-		        " -> 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+	log_file << LOG_REG_VALUE_CHANGE(one, REG_VAL(one) - 1) << F_REG_BITS << "\n";
 #endif
 }
 
@@ -962,8 +961,7 @@ void CPU::inc_r2r4()
 	bus->write_memory(memory_address, data);
 
 #if defined DEBUG
-	log_file << ": " << ADDR(memory_address) << "0x" << (uint16_t)(data - 1) <<
-		        " -> 0x" << (uint16_t)data << F_REG_BITS << "\n";
+	log_file << LOG_MEM_VALUE_CHANGE(memory_address, data - 1) << F_REG_BITS << "\n";
 #endif
 }
 
@@ -975,8 +973,7 @@ void CPU::dec_r1()
 	REG_VAL(one)--;
 
 #if defined DEBUG
-	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)(REG_VAL(one) + 1) << 
-		        " -> 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
+	log_file << LOG_REG_VALUE_CHANGE(one, REG_VAL(one) + 1) << F_REG_BITS << "\n";
 #endif
 }
 

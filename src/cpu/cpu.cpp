@@ -27,7 +27,7 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
-		if (PC == 0x106) return;
+		if (PC == 0x127) return;
 	}
 }
 

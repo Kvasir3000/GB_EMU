@@ -7,10 +7,16 @@
 #define REG_NAME(parameter_value)  current_instruction.parameter_##parameter_value->register_name
 
 #define LOG_BIT_SHIFT(reg_number, original_value) ": " << REG_NAME(reg_number) << " = 0x" << \
-                                               (uint16_t)original_value << " -> 0x" << (uint16_t)REG_VAL(reg_number) \
-                                               << F_REG_BITS << "\n"
+                                                       (uint16_t)original_value << " -> 0x" << (uint16_t)REG_VAL(reg_number) \
+                                                       << F_REG_BITS << "\n"
 
-#define LOG_BIT_SHIFT_ADDR(addr, original_value) ": ADDR[0x" << addr << "] = 0x" << (uint16_t)original_value \
+#define LOG_BIT_SHIFT_ADDR(addr, original_value) ": " << ADDR(addr) << "0x" << (uint16_t)original_value \
                                                << " -> 0x" << (uint16_t)bus->read_memory(addr) << F_REG_BITS << "\n"
 
+#define LOG_REG_VALUE_CHANGE(reg_number, original_value) ": " << REG_NAME(reg_number) << " = 0x" << (uint16_t)original_value << \
+                                                              " -> 0x" << (uint16_t)REG_VAL(reg_number)
+
+
+#define LOG_MEM_VALUE_CHANGE(addr, original_value)       ": " << ADDR(addr) << "0x" << (uint16_t)original_value << \
+                                                                " -> 0x" << (uint16_t)bus->read_memory(addr)
 

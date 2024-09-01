@@ -69,8 +69,8 @@ private:
 	INSTRUCTION current_instruction;
 	bool cb_instruction;
 
-	INSTRUCTION instruction_table_map[0xFF];
-	INSTRUCTION cb_instruction_table_map[0xFF];
+	INSTRUCTION instruction_table_map[0x100];
+	INSTRUCTION cb_instruction_table_map[0x100];
 	void init_instruction_table();
 	void init_cb_instruction_table();
 
@@ -172,4 +172,10 @@ private:
 	void sra_r1r3();
 	void srl_r1();
 	void srl_r1r3();
+	void bit_r1();
+	void bit_r1r3();
+	void set_r1();
+	void set_r1r3();
+	void res_r1();
+	void res_r1r3();
 };
