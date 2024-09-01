@@ -215,6 +215,18 @@ void CPU::init_instruction_table()
 	instruction_table_map[RLA] =        { "RLA",        4,  &A,      nullptr, nullptr, nullptr, &CPU::rl_r1 };
 	instruction_table_map[RRCA] =       { "RRCA",       4,  &A,      nullptr, nullptr, nullptr, &CPU::rrc_r1 };
 	instruction_table_map[RRA] =        { "RRA",        4,  &A,      nullptr, nullptr, nullptr, &CPU::rr_r1 };
+	instruction_table_map[JP] =         { "JP",         16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_nn };
+	instruction_table_map[JP_NZ] =      { "JP_NZ",      16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_Z] =       { "JP_Z",       16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_NC] =      { "JP_NC",      16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_C] =       { "JP_C",       16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_HL] =      { "JP_HL",      4,  &H,      nullptr, &L,      nullptr, &CPU::jp_hl };
+	instruction_table_map[JR_n] =       { "JR_n",       8,  nullptr, nullptr, nullptr, nullptr, &CPU::jr_n };
+	instruction_table_map[JR_NZ] =      { "JR_NZ",      12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+	instruction_table_map[JR_Z] =       { "JR_Z",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+	instruction_table_map[JR_NC] =      { "JR_NC",      12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+	instruction_table_map[JR_C] =       { "JR_C",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+
 }
 
 
@@ -415,10 +427,7 @@ void CPU::ld_r1r3_nn()
 // Load data from next two bytes of memory to 16-bit sp register
 void CPU::ld_sp_nn()
 {
-	uint8_t low_byte = bus->read_memory(++PC);
-	uint8_t high_byte = bus->read_memory(++PC);
-
-	SP = combine_two_bytes(high_byte, low_byte);
+	SP = get_memory_address();
 
 #if defined DEBUG
 	log_file << ": SP = 0x" << SP << "\n";
@@ -440,9 +449,9 @@ void CPU::ld_sp_r1r3()
 // Load sp + n to 16-bit r1r3 register
 void CPU::ld_r1r3_sp_n()
 {
-	uint8_t byte = bus->read_memory(++PC);
+	int8_t byte = bus->read_memory(++PC);
 	uint16_t result = SP + byte;
-	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
+	set_f_register(0, 0, is_half_carry_signed(byte, SP), is_carry_signed(byte, SP));
 
 	REG_VAL(one) = result >> 8;
 	REG_VAL(three) = (result << 8) >> 8;
@@ -458,9 +467,7 @@ void CPU::ld_r1r3_sp_n()
 // Load data from 16-bit SP register to memory address nn
 void CPU::ld_nn_sp()
 {
-	uint8_t low_byte = bus->read_memory(++PC);
-	uint8_t high_byte = bus->read_memory(++PC);
-	uint16_t memory_address = combine_two_bytes(high_byte, low_byte);
+	uint16_t memory_address = get_memory_address();
 
 	bus->write_memory(memory_address, SP & 0x00FF);
 	bus->write_memory(++memory_address, (SP & 0xFF00) >> 8);
@@ -983,13 +990,12 @@ void CPU::dec_r2r4()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
 	uint8_t  data = bus->read_memory(memory_address);
-	set_f_register((uint8_t)(data - 1) == 0, 0, is_half_borrow(data, 1), F.C);
+	set_f_register((uint8_t)(data - 1) == 0, 1, is_half_borrow(data, 1), F.C);
 	data--;
 	bus->write_memory(memory_address, data);
 
 #if defined DEBUG
-	log_file << ": " << ADDR(memory_address) << "0x" << (uint16_t)(uint8_t)(data + 1) <<
-		        " -> 0x" << (uint16_t)data << F_REG_BITS << "\n";
+	log_file << LOG_MEM_VALUE_CHANGE(memory_address, (uint8_t)(data + 1)) << F_REG_BITS << "\n";
 #endif
 }
 
@@ -1058,9 +1064,9 @@ void CPU::ld_c_a_io()
 // Add the next byte of memory to SP register
 void CPU::add_sp_n()
 {
-	uint8_t byte = bus->read_memory(++PC);
+	int8_t byte = bus->read_memory(++PC);
 	uint16_t result = SP + byte;
-	set_f_register(0, 0, is_half_carry(byte, SP), is_carry(byte, SP));
+	set_f_register(0, 0, is_half_carry_signed(byte, SP), is_carry_signed(byte, SP));
 	
 #if defined DEBUG 
 	log_file << ": SP = 0x" << SP << " + 0x" << (((uint16_t)byte) & 0xFF) <<
@@ -1247,4 +1253,80 @@ void CPU::ei()
 }
 
 
+// Jump to address provided in next two bytes of memory
+void CPU::jp_nn()
+{
+	PC = get_memory_address() - 1;
 
+#if defined DEBUG
+	log_file << LOG_JUMP;
+#endif
+}
+
+
+// Jump to address provided in next two bytes of memory, if the condition is true
+void CPU::jp_cc_nn()
+{
+	bool jump = check_jump_condition();
+
+	if (jump)
+	{
+		PC = get_memory_address() - 1;
+    }
+	else
+	{
+		PC += 2;
+	}
+	
+	
+#if defined DEBUG
+	log_file << ": " << F_REG_BITS << " : ";
+	LOG_CONDITIONAL_JUMP;
+#endif
+}
+
+
+// Jump at memory address located at HL registers
+void CPU::jp_hl()
+{
+	PC = combine_two_bytes(REG_VAL(one), REG_VAL(three)) - 1;
+
+#if defined DEBUG
+	log_file << LOG_JUMP;
+#endif
+}
+
+
+// Add n to current program counter and jump to it
+void CPU::jr_n()
+{
+	int8_t offset = bus->read_memory(PC + 1);
+	PC += offset;
+	PC -= 1;
+
+#if defined DEBUG
+	log_file << LOG_JUMP;
+#endif
+}
+
+
+// Add n to current program counter and jump to it, if the condition is true
+void CPU::jr_cc_n()
+{
+	bool jump = check_jump_condition();
+	if (jump)
+	{
+		int8_t offset = bus->read_memory(PC + 1);
+		PC += offset;
+		PC -= 1;
+	}
+	else
+	{
+		PC++;
+	}
+
+#if defined DEBUG
+	log_file << ": " << F_REG_BITS << " : ";
+	LOG_CONDITIONAL_JUMP;
+#endif
+}

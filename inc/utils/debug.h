@@ -20,3 +20,6 @@
 #define LOG_MEM_VALUE_CHANGE(addr, original_value)       ": " << ADDR(addr) << "0x" << (uint16_t)original_value << \
                                                                 " -> 0x" << (uint16_t)bus->read_memory(addr)
 
+#define LOG_JUMP                 ": 0x" << PC + 1 << "\n"     
+#define LOG_CONDITIONAL_JUMP	  if (jump)  {   log_file << LOG_JUMP; } else { log_file << " Jump is ignored\n"; }
+

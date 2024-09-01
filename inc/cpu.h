@@ -47,6 +47,8 @@ private:
 
 	uint16_t PC;
 	uint16_t SP;
+	uint16_t get_memory_address();
+	bool check_jump_condition();
 
 	bool IME;
 
@@ -152,6 +154,11 @@ private:
 	void stop();
 	void di();
 	void ei();
+	void jp_nn();
+	void jp_cc_nn();
+	void jp_hl();
+	void jr_n();
+	void jr_cc_n();
 
 	// CB instructions
 	void swap_r1();

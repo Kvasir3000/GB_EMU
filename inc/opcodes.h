@@ -2,8 +2,7 @@
 
 enum OPCODE
 {
-	// 8-bit loads
-	// LD nn, n  
+ 
 	LD_A_n = 0x3E,
 	LD_B_n = 0x06,
 	LD_C_n = 0x0E,
@@ -12,9 +11,7 @@ enum OPCODE
 	LD_H_n = 0x26,
 	LD_L_n = 0x2E,
 
-	// LD r1, r2; LD n, A 
 	LD_A_A = 0x7F,
-	// LD r1, r2
 	LD_A_B = 0x78,
 	LD_A_C = 0x79,
 	LD_A_C_IO = 0xF2,
@@ -100,7 +97,6 @@ enum OPCODE
 	LD_nn_A = 0xEA,
 	LDH_n_A = 0xE0,
 
-	// 16-bit Loads
 	LD_BC_nn = 0x01,
 	LD_DE_nn = 0x11,
 	LD_HL_nn = 0x21,
@@ -248,4 +244,16 @@ enum OPCODE
 	RLA = 0x17,
 	RRCA = 0x0F,
 	RRA = 0x1F,
+
+	JP = 0xC3,
+	JP_NZ = 0xC2,
+	JP_Z = 0xCA,
+	JP_NC = 0xD2,
+	JP_C = 0xDA,
+	JP_HL = 0xE9,
+	JR_n = 0x18,
+	JR_NZ = 0x20,
+	JR_Z = 0x28,
+	JR_NC = 0x30,
+	JR_C = 0x38,
 };
