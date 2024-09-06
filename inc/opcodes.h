@@ -2,7 +2,6 @@
 
 enum OPCODE
 {
- 
 	LD_A_n = 0x3E,
 	LD_B_n = 0x06,
 	LD_C_n = 0x0E,
@@ -82,6 +81,7 @@ enum OPCODE
 	LD_L_L = 0x6D,
 	LD_L_HL = 0x6E,
 
+	LD_HL_A = 0x77,
 	LD_HL_B = 0x70,
 	LD_HL_C = 0x71,
 	LD_HL_D = 0x72,
@@ -245,7 +245,7 @@ enum OPCODE
 	RRCA = 0x0F,
 	RRA = 0x1F,
 
-	JP = 0xC3,
+	JP_nn = 0xC3,
 	JP_NZ = 0xC2,
 	JP_Z = 0xCA,
 	JP_NC = 0xD2,
@@ -256,4 +256,26 @@ enum OPCODE
 	JR_Z = 0x28,
 	JR_NC = 0x30,
 	JR_C = 0x38,
+
+	CALL_nn = 0xCD,
+	CALL_NZ = 0xC4,
+	CALL_Z = 0xCC,
+	CALL_NC = 0xD4,
+	CALL_C = 0xDC,
+
+	RST_00 = 0xC7,
+	RST_08 = 0xCF,
+	RST_10 = 0xD7,
+	RST_18 = 0xDF,
+	RST_20 = 0xE7,
+	RST_28 = 0xEF,
+	RST_30 = 0xF7,
+	RST_38 = 0xFF,
+
+	RET = 0xC9,
+	RET_NZ = 0xC0,
+	RET_Z = 0xC8,
+	RET_NC = 0xD0,
+	RET_C = 0xD8,
+	RETI = 0xD9,
 };

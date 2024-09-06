@@ -49,6 +49,8 @@ private:
 	uint16_t SP;
 	uint16_t get_memory_address();
 	bool check_jump_condition();
+	uint8_t get_bit_mask(uint16_t offset);
+	uint8_t get_restart_offset();
 
 	bool IME;
 
@@ -159,6 +161,12 @@ private:
 	void jp_hl();
 	void jr_n();
 	void jr_cc_n();
+	void call_nn();
+	void call_cc();
+	void rst();
+	void ret();
+	void ret_cc();
+	void reti();
 
 	// CB instructions
 	void swap_r1();

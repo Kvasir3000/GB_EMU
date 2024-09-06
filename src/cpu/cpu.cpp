@@ -27,7 +27,7 @@ void CPU::start_emulation()
 	{
 		tick();
 		PC++;
-		if (PC == 0x107) return;
+		if (PC == 0x10C) return;
 	}
 }
 
@@ -76,39 +76,3 @@ void CPU::execute()
 }
 
 
-void CPU::set_f_register(bool z, bool n, bool h, bool c)
-{
-	F.Z = z;
-	F.N = n;
-	F.H = h;
-	F.C = c;
-}
-
-uint16_t CPU::get_memory_address()
-{
-	uint8_t low_byte = bus->read_memory(++PC);
-	uint8_t high_byte = bus->read_memory(++PC);
-	return combine_two_bytes(high_byte, low_byte);
-}
-
-bool CPU::check_jump_condition()
-{
-	bool jump = false;
-	if ((current_opcode == JP_NZ || current_opcode == JR_NZ) && !F.Z)
-	{
-		jump = true;
-	}
-	else if ((current_opcode == JP_Z || current_opcode == JR_Z) && F.Z)
-	{
-		jump = true;
-	}
-	else if ((current_opcode == JP_NC || current_opcode == JR_NC) && !F.C)
-	{
-		jump = true;
-	}
-	else if ((current_opcode == JP_C || current_opcode == JR_C) && F.C)
-	{
-		jump = true;
-	}
-	return jump;
-}

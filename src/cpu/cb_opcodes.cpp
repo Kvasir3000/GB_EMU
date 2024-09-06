@@ -137,7 +137,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_0] =  { "SET_D_0",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_0] =  { "SET_E_0",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_0] =  { "SET_H_0",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_0] =  { "SET_L_0",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_0] =  { "SET_L_0",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_0] = { "SET_HL_0", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[SET_A_1] =  { "SET_A_1",  8,  &A, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_B_1] =  { "SET_B_1",  8,  &B, nullptr, nullptr, nullptr, &CPU::set_r1 };
@@ -145,7 +145,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_1] =  { "SET_D_1",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_1] =  { "SET_E_1",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_1] =  { "SET_H_1",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_1] =  { "SET_L_1",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_1] =  { "SET_L_1",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_1] = { "SET_HL_1", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[SET_A_2] =  { "SET_A_2",  8,  &A, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_B_2] =  { "SET_B_2",  8,  &B, nullptr, nullptr, nullptr, &CPU::set_r1 };
@@ -153,7 +153,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_2] =  { "SET_D_2",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_2] =  { "SET_E_2",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_2] =  { "SET_H_2",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_2] =  { "SET_L_2",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_2] =  { "SET_L_2",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_2] = { "SET_HL_2", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[SET_A_3] =  { "SET_A_3",  8,  &A, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_B_3] =  { "SET_B_3",  8,  &B, nullptr, nullptr, nullptr, &CPU::set_r1 };
@@ -161,7 +161,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_3] =  { "SET_D_3",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_3] =  { "SET_E_3",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_3] =  { "SET_H_3",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_3] =  { "SET_L_3",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_3] =  { "SET_L_3",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_3] = { "SET_HL_3", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[SET_A_4] =  { "SET_A_4",  8,  &A, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_B_4] =  { "SET_B_4",  8,  &B, nullptr, nullptr, nullptr, &CPU::set_r1 };
@@ -169,7 +169,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_4] =  { "SET_D_4",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_4] =  { "SET_E_4",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_4] =  { "SET_H_4",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_4] =  { "SET_L_4",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_4] =  { "SET_L_4",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_4] = { "SET_HL_4", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[SET_A_5] =  { "SET_A_5",  8,  &A, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_B_5] =  { "SET_B_5",  8,  &B, nullptr, nullptr, nullptr, &CPU::set_r1 };
@@ -177,7 +177,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_5] =  { "SET_D_5",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_5] =  { "SET_E_5",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_5] =  { "SET_H_5",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_5] =  { "SET_L_5",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_5] =  { "SET_L_5",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_5] = { "SET_HL_5", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[SET_A_6] =  { "SET_A_6",  8,  &A, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_B_6] =  { "SET_B_6",  8,  &B, nullptr, nullptr, nullptr, &CPU::set_r1 };
@@ -185,7 +185,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_6] =  { "SET_D_6",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_6] =  { "SET_E_6",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_6] =  { "SET_H_6",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_6] =  { "SET_L_6",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_6] =  { "SET_L_6",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_6] = { "SET_HL_6", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[SET_A_7] =  { "SET_A_7",  8,  &A, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_B_7] =  { "SET_B_7",  8,  &B, nullptr, nullptr, nullptr, &CPU::set_r1 };
@@ -193,7 +193,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[SET_D_7] =  { "SET_D_7",  8,  &D, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_E_7] =  { "SET_E_7",  8,  &E, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_H_7] =  { "SET_H_7",  8,  &H, nullptr, nullptr, nullptr, &CPU::set_r1 };
-	cb_instruction_table_map[SET_L_7] =  { "SET_L_7",  8,  &L, nullptr, nullptr, nullptr, &CPU::bit_r1 };
+	cb_instruction_table_map[SET_L_7] =  { "SET_L_7",  8,  &L, nullptr, nullptr, nullptr, &CPU::set_r1 };
 	cb_instruction_table_map[SET_HL_7] = { "SET_HL_7", 16, &H, nullptr, &L,      nullptr, &CPU::set_r1r3 };
 	cb_instruction_table_map[RES_A_0] =  { "RES_A_0",  8,  &A, nullptr, nullptr, nullptr, &CPU::res_r1 };
 	cb_instruction_table_map[RES_B_0] =  { "RES_B_0",  8,  &B, nullptr, nullptr, nullptr, &CPU::res_r1 };
@@ -434,7 +434,7 @@ void CPU::srl_r1r3()
 // Test bit b in register r1
 void CPU::bit_r1()
 {
-	uint8_t bit_mask = get_bit_mask(current_opcode, 0x40);
+	uint8_t bit_mask = get_bit_mask(0x40);
 	set_f_register((REG_VAL(one) & bit_mask)  == 0, 0, 1, F.C);
 
 #if defined DEBUG
@@ -448,7 +448,7 @@ void CPU::bit_r1r3()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	uint16_t data = bus->read_memory(memory_address);
-	uint8_t bit_mask = get_bit_mask(current_opcode, 0x40);
+	uint8_t bit_mask = get_bit_mask(0x40);
 	set_f_register((data & bit_mask) == 0, 0, 1, F.C);
 
 #if defined DEBUG
@@ -460,7 +460,7 @@ void CPU::bit_r1r3()
 // Set bit of r1 register r1 at index b
 void CPU::set_r1()
 {
-	uint8_t bit_mask = get_bit_mask(current_opcode, 0xC0);
+	uint8_t bit_mask = get_bit_mask(0xC0);
 	uint8_t register_value = REG_VAL(one);
 	REG_VAL(one) |= bit_mask;
 
@@ -476,7 +476,7 @@ void CPU::set_r1r3()
 	//assert(false);
 	uint16_t memory_address = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	uint8_t  data = bus->read_memory(memory_address);
-	uint8_t bit_mask = get_bit_mask(current_opcode, 0xC0);
+	uint8_t bit_mask = get_bit_mask(0xC0);
 	bus->write_memory(memory_address, data | bit_mask);
 
 #if defined DEBUG
@@ -488,7 +488,7 @@ void CPU::set_r1r3()
 // Reset bit of r1 register r1 at index b
 void CPU::res_r1()
 {
-	uint8_t bit_mask = get_bit_mask(current_opcode, 0x80);
+	uint8_t bit_mask = get_bit_mask(0x80);
 	uint8_t register_value = REG_VAL(one);
 	REG_VAL(one) &= ~bit_mask;
 
@@ -503,7 +503,7 @@ void CPU::res_r1r3()
 {
 	uint16_t memory_address = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	uint8_t  data = bus->read_memory(memory_address);
-	uint8_t bit_mask = get_bit_mask(current_opcode, 0x80);
+	uint8_t bit_mask = get_bit_mask(0x80);
 	bus->write_memory(memory_address, data & (~bit_mask));
 
 #if defined DEBUG

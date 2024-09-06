@@ -73,6 +73,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[LD_L_H] =     { "LD_L_H",     4,  &L,      &H,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_L_L] =     { "LD_L_L",     4,  &L,      &L,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_L_HL] =    { "LD_L_HL",    8,  &L,      &H,      nullptr, &L,      &CPU::ld_r1_r2r4 };
+	instruction_table_map[LD_HL_A] =    { "LD_HL_A",    8,  &H,      &A,      &L,      nullptr, &CPU::ld_r1r3_r2 };
 	instruction_table_map[LD_HL_B] =    { "LD_HL_B",    8,  &H,      &B,      &L,      nullptr, &CPU::ld_r1r3_r2 };
 	instruction_table_map[LD_HL_C] =    { "LD_HL_C",    8,  &H,      &C,      &L,      nullptr, &CPU::ld_r1r3_r2 };
 	instruction_table_map[LD_HL_D] =    { "LD_HL_D",    8,  &H,      &D,      &L,      nullptr, &CPU::ld_r1r3_r2 };
@@ -215,7 +216,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[RLA] =        { "RLA",        4,  &A,      nullptr, nullptr, nullptr, &CPU::rl_r1 };
 	instruction_table_map[RRCA] =       { "RRCA",       4,  &A,      nullptr, nullptr, nullptr, &CPU::rrc_r1 };
 	instruction_table_map[RRA] =        { "RRA",        4,  &A,      nullptr, nullptr, nullptr, &CPU::rr_r1 };
-	instruction_table_map[JP] =         { "JP",         16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_nn };
+	instruction_table_map[JP_nn] =      { "JP",         16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_nn };
 	instruction_table_map[JP_NZ] =      { "JP_NZ",      16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
 	instruction_table_map[JP_Z] =       { "JP_Z",       16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
 	instruction_table_map[JP_NC] =      { "JP_NC",      16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
@@ -226,7 +227,25 @@ void CPU::init_instruction_table()
 	instruction_table_map[JR_Z] =       { "JR_Z",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
 	instruction_table_map[JR_NC] =      { "JR_NC",      12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
 	instruction_table_map[JR_C] =       { "JR_C",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
-
+	instruction_table_map[CALL_nn] =    { "CALL_nn",    24, nullptr, nullptr, nullptr, nullptr, &CPU::call_nn };
+	instruction_table_map[CALL_NZ] =    { "CALL_NZ",    24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[CALL_Z] =     { "CALL_Z",     24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[CALL_NC] =    { "CALL_NC",    24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[CALL_C] =     { "CALL_C",     24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[RST_00] =     { "RST_00",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RST_08] =     { "RST_08",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RST_10] =     { "RST_10",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RST_18] =     { "RST_18",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RST_20] =     { "RST_20",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RST_28] =     { "RST_28",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RST_30] =     { "RST_30",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RST_38] =     { "RST_38",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
+	instruction_table_map[RET] =        { "RET",        8,  nullptr, nullptr, nullptr, nullptr, &CPU::ret };
+	instruction_table_map[RET_NZ] =     { "RET_NZ",     8,  nullptr, nullptr, nullptr, nullptr, &CPU::ret_cc };
+	instruction_table_map[RET_Z] =      { "RET_Z",      8,  nullptr, nullptr, nullptr, nullptr, &CPU::ret_cc };
+	instruction_table_map[RET_NC] =     { "RET_NC",     8,  nullptr, nullptr, nullptr, nullptr, &CPU::ret_cc };
+	instruction_table_map[RET_C] =      { "RET_C",      8,  nullptr, nullptr, nullptr, nullptr, &CPU::ret_cc };
+	instruction_table_map[RETI] =       { "RETI",       8,  nullptr, nullptr, nullptr, nullptr, &CPU::reti   };
 }
 
 
@@ -312,7 +331,7 @@ void CPU::ldd_r1_r2r4()
 }
 
 
-// Load data from memory address stored at 16-bit r2r4 register to r1 register and decrement r2r4
+// Load data from memory address stored at 16-bit r2r4 register to r1 register and increment r2r4
 void CPU::ldi_r1_r2r4()
 {
 	ld_r1_r2r4();
@@ -383,10 +402,11 @@ void CPU::ld_r1r3_n()
 #endif
 }
 
+
 // Load data from register r1 to memory address stored at next 2-bytes 
 void CPU::ld_nn_r1()
 {
-	uint16_t memory_addr = (bus->read_memory(++PC)) | (bus->read_memory(++PC) << 8);
+	uint16_t memory_addr = get_memory_address();
 	bus->write_memory(memory_addr, REG_VAL(one));
 
 #if defined DEBUG
@@ -1280,8 +1300,8 @@ void CPU::jp_cc_nn()
 	
 	
 #if defined DEBUG
-	log_file << ": " << F_REG_BITS << " : ";
-	LOG_CONDITIONAL_JUMP;
+	//log_file << ": " << F_REG_BITS << " : ";
+	log_file << LOG_CONDITIONAL_JUMP;
 #endif
 }
 
@@ -1326,7 +1346,105 @@ void CPU::jr_cc_n()
 	}
 
 #if defined DEBUG
-	log_file << ": " << F_REG_BITS << " : ";
-	LOG_CONDITIONAL_JUMP;
+	//log_file << ": " << F_REG_BITS << " : ";
+	log_file << LOG_CONDITIONAL_JUMP;
 #endif
 }
+
+
+// Push current address onto stack and jump to nn address
+void CPU::call_nn()
+{
+	// Need to verify if incrementing by 3 is required, according to the Zilog spec I should just push
+	// the current content of the PC register, but in case of return, this doesn't make any sense. Maybe
+	// PC increment should be treated differently in such scenario, but right now adding 3 looks to be a 
+	// valid thing. This will become more clear after testing
+	bus->write_memory(--SP, (((PC + 3) & 0xFF00) >> 8));
+	bus->write_memory(--SP, (PC + 3) & 0x00FF);
+	PC = get_memory_address() - 1;
+
+#if defined DEBUG
+	log_file << ": " << ADDR_SP(SP + 1) <<  " 0x" << (uint16_t)bus->read_memory(SP + 1) << 
+		        "\n\t\t\t\t  " << ADDR_SP(SP) << " 0x" << (uint16_t)bus->read_memory(SP) <<
+		        "\n\t\t\t\t  JUMP" << LOG_JUMP;
+#endif
+}
+
+
+// Push current address onto stack and jump to nn address, if the condition is true
+void CPU::call_cc()
+{
+	bool jump = check_jump_condition();
+	if (jump)
+	{
+		call_nn();
+	}
+
+#if defined DEBUG
+	if (!jump)
+	{
+		log_file << F_REG_BITS << " : Jump is ignored\n";
+	}
+#endif
+}
+
+
+// Push current address onto stack and jump to address 0x0000 + n
+void CPU::rst()
+{
+	bus->write_memory(--SP, ((PC + 1) & 0xFF00) >> 8);
+	bus->write_memory(--SP, (PC + 1) & 0x00FF);
+	uint8_t offset = get_restart_offset();
+	PC = 0x0000 + offset - 1;
+
+#if defined DEBUG
+	log_file << ": " << ADDR_SP(SP + 1) << "0x" << (uint16_t)bus->read_memory(SP + 1) <<
+                "\n\t\t\t\t  " << ADDR_SP(SP) << " 0x" << (uint16_t)bus->read_memory(SP) <<
+		        "\n\t\t\t\t  JUMP" << LOG_JUMP;
+#endif
+}
+
+
+
+// Pop two bytes from the stack and jump to this address
+void CPU::ret()
+{
+	uint16_t memory_address = 0;
+	memory_address = bus->read_memory(SP++) | (bus->read_memory(SP++) << 8);
+	PC = memory_address - 1;
+
+#if defined DEBUG
+	log_file << LOG_JUMP;
+#endif
+}
+
+
+// Pop two bytes from the stack and jump to this address, if condition is true
+void CPU::ret_cc()
+{
+	bool jump = check_jump_condition();
+	if (jump)
+	{
+		ret();
+	}
+
+#if defined DEBUG
+	if (!jump)
+	{
+		log_file << F_REG_BITS << " : Jump is ignored\n";
+	}
+#endif
+}
+
+
+
+// Pop two bytes from the stack and jump to this address, enable interrupts
+void CPU::reti()
+{
+	ret();
+#if defined DEBUG 
+	log_file << "\t\t\t  EI";
+#endif
+	ei();
+}
+
