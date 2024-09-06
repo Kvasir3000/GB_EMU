@@ -11,6 +11,7 @@ set( SOURCES
 	src/cpu/cpu.cpp
 	src/cpu/opcodes.cpp
 	src/cpu/cb_opcodes.cpp
+        src/cpu/cpu_misc.cpp
 	src/bus.cpp
 	src/utils/utils.cpp
 )
