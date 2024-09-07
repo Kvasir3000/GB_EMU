@@ -335,8 +335,8 @@ void CPU::ldd_r1_r2r4()
 void CPU::ldi_r1_r2r4()
 {
 	ld_r1_r2r4();
-	REG_VAL(one) = REG_VAL(two);
-	REG_VAL(three) = REG_VAL(four);
+	current_instruction.parameter_one = current_instruction.parameter_two;//REG_VAL(one) = REG_VAL(two);
+	current_instruction.parameter_three = current_instruction.parameter_four;//REG_VAL(three) = REG_VAL(four);
 	current_instruction.parameter_two = nullptr;
 	current_instruction.parameter_four = nullptr;
 
@@ -356,7 +356,7 @@ void CPU::ld_r1r3_r2()
 	bus->write_memory(memory_addr, REG_VAL(two));
 
 #if defined DEBUG
-	log_file << ": " << ADDR(memory_addr) << REG_VAL(two) << 
+	log_file << ": " << ADDR(memory_addr) << (uint16_t)REG_VAL(two) << 
 		        " = 0x" << (uint16_t)REG_VAL(two) << "\n";
 #endif
 }
@@ -1232,7 +1232,7 @@ void CPU::nop()
 void CPU::halt()
 {
 	halted = true;
-	assert(false); // Check how this instruction should be working
+//	assert(false); // Check how this instruction should be working
 
 #if defined DEBUG
 	log_file << "\n";
@@ -1243,8 +1243,8 @@ void CPU::halt()
 // Halt CPU & LCD until button pressed
 void CPU::stop()
 {
-	assert(false); // Implement this later
-
+	//assert(false); // Implement this later
+	halted = true;
 #if defined DEBUG
 	log_file << "\n";
 #endif
@@ -1321,7 +1321,7 @@ void CPU::jp_hl()
 void CPU::jr_n()
 {
 	int8_t offset = bus->read_memory(PC + 1);
-	PC += offset;
+	PC += offset + 2; // adding 2 to include this opcode and its operand
 	PC -= 1;
 
 #if defined DEBUG

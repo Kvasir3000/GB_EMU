@@ -23,11 +23,10 @@ CPU::CPU(BUS* bus)
 
 void CPU::start_emulation()
 {
-	while (true)
+	while (!halted)
 	{
 		tick();
 		PC++;
-		if (PC == 0x10C) return;
 	}
 }
 
