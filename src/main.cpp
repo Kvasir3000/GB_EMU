@@ -9,7 +9,7 @@
 
 void read_cpu_program(std::vector<uint8_t>&program_data)
 {
-    std::string test_path = "../tests/cpu/Blarggs/01-special.gb";
+    std::string test_path = "../tests/cpu/Blarggs/cpu_instrs.gb";
     std::ifstream file(test_path, std::ios::binary);
     if (file.is_open())
     {

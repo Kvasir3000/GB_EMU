@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <vector>
 
+#define SB  0xFF01
+#define SC  0xFF02
+
 class BUS
 {
 public:

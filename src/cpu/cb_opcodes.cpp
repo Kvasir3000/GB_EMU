@@ -35,7 +35,7 @@ void CPU::init_cb_instruction_table()
 	cb_instruction_table_map[RRC_H] =    { "RRC_H",    8,  &H, nullptr, nullptr, nullptr, &CPU::rrc_r1 };
 	cb_instruction_table_map[RRC_L] =    { "RRC_L",    8,  &L, nullptr, nullptr, nullptr, &CPU::rrc_r1 };
 	cb_instruction_table_map[RRC_HL] =   { "RRC_HL",   16, &H, nullptr, &L,      nullptr, &CPU::rrc_r1r3 };
-	cb_instruction_table_map[RR_A] =     { "RR_A",     8,  &A, nullptr, &A,      nullptr, &CPU::rr_r1};
+	cb_instruction_table_map[RR_A] =     { "RR_A",     8,  &A, nullptr, nullptr, nullptr, &CPU::rr_r1};
 	cb_instruction_table_map[RR_B] =     { "RR_B",     8,  &B, nullptr, nullptr, nullptr, &CPU::rr_r1 };
 	cb_instruction_table_map[RR_C] =     { "RR_C",     8,  &C, nullptr, nullptr, nullptr, &CPU::rr_r1 };
 	cb_instruction_table_map[RR_D] =     { "RR_D",     8,  &D, nullptr, nullptr, nullptr, &CPU::rr_r1 };

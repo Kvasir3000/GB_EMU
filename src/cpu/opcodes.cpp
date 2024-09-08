@@ -508,7 +508,7 @@ void CPU::ld_nn_sp()
 void CPU::push_af()
 {
 	bus->write_memory(--SP, A.register_value);
-	uint8_t f_register = (F.Z << 3) | (F.N << 2) | (F.H << 1) | F.C;
+	uint8_t f_register = (F.Z << 7) | (F.N << 6) | (F.H << 5) | (F.C << 4);
 	bus->write_memory(--SP, f_register);
 
 #if defined DEBUG
@@ -522,6 +522,10 @@ void CPU::push_af()
 // Push r1r3 register to stack
 void CPU::push_r1r3()
 {
+	if (PC == 0x862)
+	{
+		int a = 234;
+	}
 	bus->write_memory(--SP, REG_VAL(one));
 	bus->write_memory(--SP, REG_VAL(three));
 
@@ -537,7 +541,7 @@ void CPU::push_r1r3()
 void CPU::pop_af()
 {
 	uint8_t f_data = bus->read_memory(SP++);
-	set_f_register(f_data & 0x8, f_data & 0x4, f_data & 0x2, f_data & 0x1);
+	set_f_register(f_data & 0x80, f_data & 0x40, f_data & 0x20, f_data & 0x10);
 
 	uint8_t data = bus->read_memory(SP++);
 	A.register_value = data;
@@ -1154,12 +1158,13 @@ void CPU::daa()
 {
 	uint8_t register_value = A.register_value;
 	uint8_t correction_value = 0x00;
+
 	if (F.H || ((register_value & 0x0F) > 0x9))
 	{
 		correction_value |= 0x6;
 	}
 
-	if (F.C || (((register_value & 0xF0) >> 4) > 0x9))
+	if (F.C || ((((register_value + correction_value) & 0xF0) >> 4) > 0x9))
 	{
 		correction_value |= 0x60;
 	}
@@ -1300,7 +1305,6 @@ void CPU::jp_cc_nn()
 	
 	
 #if defined DEBUG
-	//log_file << ": " << F_REG_BITS << " : ";
 	log_file << LOG_CONDITIONAL_JUMP;
 #endif
 }
@@ -1337,7 +1341,7 @@ void CPU::jr_cc_n()
 	if (jump)
 	{
 		int8_t offset = bus->read_memory(PC + 1);
-		PC += offset;
+		PC += offset + 2; // adding 2 to include this opcode and its operand;
 		PC -= 1;
 	}
 	else
@@ -1346,7 +1350,6 @@ void CPU::jr_cc_n()
 	}
 
 #if defined DEBUG
-	//log_file << ": " << F_REG_BITS << " : ";
 	log_file << LOG_CONDITIONAL_JUMP;
 #endif
 }
@@ -1378,6 +1381,10 @@ void CPU::call_cc()
 	if (jump)
 	{
 		call_nn();
+	}
+	else
+	{
+		PC += 2;
 	}
 
 #if defined DEBUG
