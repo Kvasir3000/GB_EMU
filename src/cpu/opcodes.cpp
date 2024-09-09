@@ -1158,31 +1158,41 @@ void CPU::daa()
 {
 	uint8_t register_value = A.register_value;
 	uint8_t correction_value = 0x00;
-
-	if (F.H || ((register_value & 0x0F) > 0x9))
+	if (!F.N)
 	{
-		correction_value |= 0x6;
-	}
+		if (F.H || ((register_value & 0x0F) > 0x9))
+		{
+			correction_value |= 0x6;
+		}
 
-	if (F.C || ((((register_value + correction_value) & 0xF0) >> 4) > 0x9))
-	{
-		correction_value |= 0x60;
-	}
-
-	if (F.N)
-	{
-		A.register_value -= correction_value;
+		if (F.C || register_value > 0x99)
+		{
+			correction_value |= 0x60;
+		}
+		A.register_value += correction_value;
 	}
 	else
 	{
-		A.register_value += correction_value;
+		if (F.H)
+		{
+			correction_value |= 0x6;
+		}
+
+		if (F.C)
+		{
+			correction_value |= 0x60;
+		}
+		A.register_value -= correction_value;
 	}
 
 	set_f_register(A.register_value == 0, F.N, 0, is_carry(register_value, correction_value));
-
+	
 #if defined DEBUG
 	log_file << ": A = 0x" <<(uint16_t)register_value << " -> 0x" << (uint16_t)A.register_value <<
 		        F_REG_BITS << "\n";
+#else 
+	log_file << "0x" << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (uint16_t)register_value << " 0x" <<
+		std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (uint16_t)A.register_value << "\n";
 #endif
 }
 
