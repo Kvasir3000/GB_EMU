@@ -188,7 +188,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[DEC_D] =      { "DEC_D",      4,  &D,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_E] =      { "DEC_E",      4,  &E,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_H] =      { "DEC_H",      4,  &H,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
-	instruction_table_map[DEC_L] =      { "DEC_A",      4,  &L,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
+	instruction_table_map[DEC_L] =      { "DEC_L",      4,  &L,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_HL_A] =   { "DEC_[HL]",   12, nullptr, &H,      nullptr, &L,      &CPU::dec_r2r4 };
 	instruction_table_map[ADD_HL_BC] =  { "ADD_HL_BC",  8,  &H,      &B,      &L,      &C,      &CPU::add_r1r3_r2r4 };
 	instruction_table_map[ADD_HL_DE] =  { "ADD_HL_DE",  8,  &H,      &D,      &L,      &E,      &CPU::add_r1r3_r2r4 };
@@ -308,7 +308,7 @@ void CPU::ld_r1_r2r4()
 
 #if defined DEBUG
 	log_file << ": " << REG_NAME(one) << " = " << ADDR(memory_address) <<
-		        "0x" << (uint16_t)REG_VAL(one) << "\n";
+		"0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 
@@ -358,6 +358,11 @@ void CPU::ld_r1r3_r2()
 #if defined DEBUG
 	log_file << ": " << ADDR(memory_addr) << (uint16_t)REG_VAL(two) << 
 		        " = 0x" << (uint16_t)REG_VAL(two) << "\n";
+#else 
+	if (PC == 0xC089)
+	{
+		//log_file << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << (uint16_t)bus->read_memory(memory_addr) << "\n";
+	}
 #endif
 }
 
@@ -424,7 +429,7 @@ void CPU::ldh_n_r1()
 	bus->write_memory(memory_address, REG_VAL(one));
 
 #if defined DEBUG
-	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = " << 
+	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = " <<
 		        ADDR(memory_address) << REG_NAME(one) <<
 		        " = 0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
@@ -522,10 +527,6 @@ void CPU::push_af()
 // Push r1r3 register to stack
 void CPU::push_r1r3()
 {
-	if (PC == 0x862)
-	{
-		int a = 234;
-	}
 	bus->write_memory(--SP, REG_VAL(one));
 	bus->write_memory(--SP, REG_VAL(three));
 
@@ -1031,7 +1032,7 @@ void CPU::add_r1r3_r2r4()
 	uint16_t register_two = combine_two_bytes(REG_VAL(two), REG_VAL(four));
 	uint16_t result = register_one + register_two;
 	set_f_register(F.Z, 0, is_half_carry_16_bit(register_one, register_two), is_carry_16_bit(register_one, register_two));
-	REG_VAL(one) = result & 0xFF00;
+	REG_VAL(one) = result >> 8;
 	REG_VAL(three) = result & 0xFF;
 
 #if defined DEBUG 
@@ -1047,7 +1048,8 @@ void CPU::add_r1r3_sp()
 	uint16_t register_one = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	uint16_t result = register_one + SP;
 	set_f_register(F.Z, 0, is_half_carry_16_bit(register_one, SP), is_carry_16_bit(register_one, SP));
-	REG_VAL(one) = result & 0xFF00;
+
+	REG_VAL(one) = result >> 8;
 	REG_VAL(three) = result & 0xFF;
 
 #if defined DEBUG 
@@ -1158,6 +1160,7 @@ void CPU::daa()
 {
 	uint8_t register_value = A.register_value;
 	uint8_t correction_value = 0x00;
+	bool carry = false;
 	if (!F.N)
 	{
 		if (F.H || ((register_value & 0x0F) > 0x9))
@@ -1168,6 +1171,7 @@ void CPU::daa()
 		if (F.C || register_value > 0x99)
 		{
 			correction_value |= 0x60;
+			carry = true;
 		}
 		A.register_value += correction_value;
 	}
@@ -1181,18 +1185,16 @@ void CPU::daa()
 		if (F.C)
 		{
 			correction_value |= 0x60;
+			carry = true;
 		}
 		A.register_value -= correction_value;
 	}
 
-	set_f_register(A.register_value == 0, F.N, 0, is_carry(register_value, correction_value));
+	set_f_register(A.register_value == 0, F.N, 0, carry);
 	
 #if defined DEBUG
 	log_file << ": A = 0x" <<(uint16_t)register_value << " -> 0x" << (uint16_t)A.register_value <<
 		        F_REG_BITS << "\n";
-#else 
-	log_file << "0x" << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (uint16_t)register_value << " 0x" <<
-		std::hex << std::setw(2) << std::setfill('0') << std::uppercase << (uint16_t)A.register_value << "\n";
 #endif
 }
 
