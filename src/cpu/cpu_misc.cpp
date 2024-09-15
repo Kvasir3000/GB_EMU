@@ -53,5 +53,4 @@ uint8_t CPU::get_restart_offset()
 	offset |= (current_opcode - 0xC0) & 0xF0;
 	offset |= ((current_opcode & 0x0F) == 0x07) ? 0x0 : 0x8;
 	return offset;
-
 }

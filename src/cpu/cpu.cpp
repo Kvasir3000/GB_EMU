@@ -2,16 +2,17 @@
 
 CPU::CPU(BUS* bus)
 {
+	A = { 0x01, "A" };
+	B = { 0xFF, "B" };
+	C = { 0x13, "C" };
+	D = { 0x00, "D" };
+	E = { 0xC1, "E" };
+	H = { 0x84, "H" };
+	L = { 0x03, "L" };
+	F = { 0, 0, 0, 0, 0 };
 	PC = 0x100;
-	SP = 0xFFFF;
-	A.register_name = "A";
-	B.register_name = "B";
-	C.register_name = "C";
-	D.register_name = "D";
-	E.register_name = "E";
-	H.register_name = "H";
-	L.register_name = "L";
-	F = { 0, 0, 0, 0, 0};
+	SP = 0xFFFE;
+	
 	cb_instruction = false;
 	halted = false;
 
@@ -65,6 +66,8 @@ void CPU::decode_instruction()
 	log_file << "PC:0x" << std::hex << PC << "-> INST:0x" << std::setw(2) << std::setfill('0') << 
 		         (cb_instruction? "CB" : "") << (uint16_t)current_opcode << "-> " << 
 		         current_instruction.opcode_name;
+#else 
+	//log_file << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << PC << "\n";
 #endif
 }
 

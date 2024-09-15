@@ -68,6 +68,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[LD_H_HL]  =   { "LD_H_HL",    8,  &H,      &H,      nullptr, &L,      &CPU::ld_r1_r2r4 };
 	instruction_table_map[LD_L_A] =     { "LD_L_A",     4,  &L,      &A,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_L_B]  =    { "LD_L_B",     4,  &L,      &B,      nullptr, nullptr, &CPU::ld_r1_r2 };
+	instruction_table_map[LD_L_C] =     { "LD_L_C",     4,  &L,      &C,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_L_D] =     { "LD_L_D",     4,  &L,      &D,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_L_E] =     { "LD_L_E",     4,  &L,      &E,      nullptr, nullptr, &CPU::ld_r1_r2 };
 	instruction_table_map[LD_L_H] =     { "LD_L_H",     4,  &L,      &H,      nullptr, nullptr, &CPU::ld_r1_r2 };
@@ -318,7 +319,7 @@ void CPU::ldd_r1_r2r4()
 {
 	ld_r1_r2r4();
 	REG_VAL(one) = REG_VAL(two);
-	REG_VAL(three) = REG_VAL(four);
+	current_instruction.parameter_three = current_instruction.parameter_four;
 	current_instruction.parameter_two = nullptr;
 	current_instruction.parameter_four = nullptr;
 
@@ -432,6 +433,11 @@ void CPU::ldh_n_r1()
 	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = " <<
 		        ADDR(memory_address) << REG_NAME(one) <<
 		        " = 0x" << (uint16_t)REG_VAL(one) << "\n";
+#else
+	if ((PC - 1) == 0xc59D)
+	{
+		//log_file << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (uint16_t)REG_VAL(one) << "\n";
+	}
 #endif
 }
 
@@ -520,6 +526,12 @@ void CPU::push_af()
 	log_file << ": " << ADDR_SP(SP + 1) << "A = 0x" << (uint16_t)A.register_value <<
 		        "\n\t\t\t\t" << ADDR_SP(SP) << "F = 0x" << 
 		        (uint16_t)f_register << F_REG_BITS << "\n";
+#else 
+	if (PC == 0xc510)
+	{
+		log_file << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (uint16_t)A.register_value <<
+			        std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (uint16_t)f_register << "\n";
+	}
 #endif
 }
 
@@ -629,8 +641,12 @@ void CPU::adc_r1_r2()
 	uint8_t value_one = REG_VAL(one);
 	uint8_t value_two = REG_VAL(two);
 	uint8_t result = value_one + value_two + carry;
-    set_f_register(result == 0, 0, is_half_carry(value_one, value_two + carry),
-		           is_carry(value_one, value_two + carry));
+	bool half_carry = is_half_carry(value_one, value_two + carry) || is_half_carry(value_two, carry);
+	bool c = is_carry(value_one, value_two + carry) || is_carry(value_two, carry);
+
+	set_f_register(result == 0, 0,
+		          ((value_one & 0x0F) + (value_two & 0x0F) + carry) > 0x0F,
+		          value_one + value_two + carry > 0xFF);
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -650,8 +666,9 @@ void CPU::adc_r1_r2r4()
 	uint8_t  register_value = REG_VAL(one);
 	uint8_t  carry = F.C;
 	uint8_t  result = register_value + data + carry;
-	set_f_register(result == 0, 0, is_half_carry(register_value, data + carry), 
-		           is_carry(register_value, data + carry));
+	set_f_register(result == 0, 0,
+		          ((register_value & 0x0F) + (data & 0x0F) + carry) > 0x0F,
+		          register_value + data + carry > 0xFF);
 	REG_VAL(one) = result;
 	
 #if defined DEBUG
@@ -670,8 +687,9 @@ void CPU::adc_r1_n()
 	uint8_t carry = F.C;
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = register_value + data + carry;
-	set_f_register(result == 0, 0, is_half_carry(register_value, data + carry), 
-		           is_carry(register_value, data + carry));
+	set_f_register(result == 0, 0, 
+		           ((register_value & 0x0F) + (data & 0x0F) + carry) > 0x0F,
+		           register_value + data + carry > 0xFF);
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -724,7 +742,7 @@ void CPU::sub_r1_n()
 	uint8_t data = bus->read_memory(++PC);
 	uint8_t register_value = REG_VAL(one);
 	uint8_t result = register_value - data; 
-	set_f_register(result == 0, 0, is_half_borrow(register_value, data), is_borrow(register_value, data));
+	set_f_register(result == 0, 1, is_half_borrow(register_value, data), is_borrow(register_value, data));
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -742,9 +760,11 @@ void CPU::sbc_r1_r2()
 	uint8_t carry = F.C;
 	uint8_t value_one = REG_VAL(one);
 	uint8_t value_two = REG_VAL(two);
-	uint8_t result = value_one - (value_two + carry);
-	set_f_register(result == 0, 0, is_half_borrow(value_one, value_two + carry),
-		           is_borrow(value_one, value_two + carry));
+	uint8_t result = value_one - value_two - carry;
+	set_f_register(result == 0,
+		          1,
+		          ((value_one & 0xF) - (value_two & 0xF) - carry) < 0,
+		          value_one < (value_two + carry));
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -764,8 +784,10 @@ void CPU::sbc_r1_r2r4()
 	uint8_t  register_value = REG_VAL(one);
 	uint8_t  carry = F.C;
 	uint8_t  result = register_value - (data + carry);
-	set_f_register(result == 0, 0, is_half_borrow(register_value, data + carry),
-	               is_borrow(register_value, data + carry));
+	set_f_register(result == 0, 
+		          1,
+		          ((register_value & 0xF) - (data & 0xF) - carry) < 0,
+		          register_value < (data + carry));
 	REG_VAL(one) = result;
 
 #if defined DEBUG
@@ -783,9 +805,10 @@ void CPU::sbc_r1_n()
 	uint8_t data = bus->read_memory(++PC);
 	uint8_t carry = F.C;
 	uint8_t register_value = REG_VAL(one);
-	uint8_t result = register_value - (data + carry);
-	set_f_register(result == 0, 0, is_half_borrow(register_value, data + carry),
-		           is_borrow(register_value, data + carry));
+	uint8_t result = register_value - data - carry;
+	set_f_register(result == 0, 1,
+		           ((register_value & 0xF) - (data & 0xF) - carry) < 0,
+	               register_value < (data + carry));
 	REG_VAL(one) = result;
 
 #if defined DEBUG
