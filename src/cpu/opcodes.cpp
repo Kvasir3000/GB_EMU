@@ -124,7 +124,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[SUB_A] =      { "SUB_A",      4,  &A,      &A,      nullptr, nullptr, &CPU::sub_r1_r2};
 	instruction_table_map[SUB_B] =      { "SUB_B",      4,  &A,      &B,      nullptr, nullptr, &CPU::sub_r1_r2 };
 	instruction_table_map[SUB_C] =      { "SUB_C",      4,  &A,      &C,      nullptr, nullptr, &CPU::sub_r1_r2 };
-	instruction_table_map[SUB_D] =      { "SUB_D",      4,  &A,      &D,      nullptr, nullptr, &CPU::sub_r1_r2};
+	instruction_table_map[SUB_D] =      { "SUB_D",      4,  &A,      &D,      nullptr, nullptr, &CPU::sub_r1_r2 };
 	instruction_table_map[SUB_E] =      { "SUB_E",      4,  &A,      &E,      nullptr, nullptr, &CPU::sub_r1_r2 };
 	instruction_table_map[SUB_H] =      { "SUB_H",      4,  &A,      &H,      nullptr, nullptr, &CPU::sub_r1_r2 };
 	instruction_table_map[SUB_L] =      { "SUB_L",      4,  &A,      &L,      nullptr, nullptr, &CPU::sub_r1_r2 };
@@ -183,7 +183,7 @@ void CPU::init_instruction_table()
 	instruction_table_map[INC_H] =      { "INC_H",      4,  &H,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
 	instruction_table_map[INC_L] =      { "INC_L",      4,  &L,      nullptr, nullptr, nullptr, &CPU::inc_r1 };
 	instruction_table_map[INC_HL_A] =   { "INC_[HL]",   12, nullptr, &H,      nullptr, &L,      &CPU::inc_r2r4 };
-	instruction_table_map[DEC_A] =      { "DEC_A",      4,  &A,      nullptr, nullptr, nullptr, &CPU::dec_r1};
+	instruction_table_map[DEC_A] =      { "DEC_A",      4,  &A,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_B] =      { "DEC_B",      4,  &B,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_C] =      { "DEC_C",      4,  &C,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
 	instruction_table_map[DEC_D] =      { "DEC_D",      4,  &D,      nullptr, nullptr, nullptr, &CPU::dec_r1 };
@@ -255,7 +255,7 @@ void CPU::ld_r1_n()
 {
 	REG_VAL(one) = bus->read_memory(++PC);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
@@ -267,7 +267,7 @@ void CPU::ld_r1_nn()
 	uint16_t memory_address = (bus->read_memory(++PC)) | (bus->read_memory(++PC) << 8);
 	REG_VAL(one) = bus->read_memory(memory_address);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << "= " << ADDR(memory_address) <<
 		        (uint16_t)REG_VAL(one) << "\n";
 #endif 
@@ -281,7 +281,7 @@ void CPU::ldh_r1_n()
 	uint16_t memory_address = 0xFF00 + memory_offset;
 	REG_VAL(one) = bus->read_memory(memory_address);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = ADDR[0xFF00 + 0x" <<
 		        (uint16_t)memory_offset << "] = " << ADDR(memory_address) << "0x" <<
 		        (uint16_t)REG_VAL(one) << "\n";
@@ -294,7 +294,7 @@ void CPU::ld_r1_r2()
 {
 	REG_VAL(one) = REG_VAL(two);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(two) << " = 0x" << 
 		        (uint16_t)REG_VAL(one)  << "\n";
 #endif
@@ -307,7 +307,7 @@ void CPU::ld_r1_r2r4()
 	uint16_t memory_address = combine_two_bytes(REG_VAL(two), REG_VAL(four));
 	REG_VAL(one) = bus->read_memory(memory_address);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << ADDR(memory_address) <<
 		"0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
@@ -318,12 +318,12 @@ void CPU::ld_r1_r2r4()
 void CPU::ldd_r1_r2r4()
 {
 	ld_r1_r2r4();
-	REG_VAL(one) = REG_VAL(two);
+	current_instruction.parameter_one = current_instruction.parameter_two;
 	current_instruction.parameter_three = current_instruction.parameter_four;
 	current_instruction.parameter_two = nullptr;
 	current_instruction.parameter_four = nullptr;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "PC:0x" << PC << "-> INST:0x" << (uint16_t)current_opcode << "-> " << 
 		        current_instruction.opcode_name; 
 #endif
@@ -336,12 +336,12 @@ void CPU::ldd_r1_r2r4()
 void CPU::ldi_r1_r2r4()
 {
 	ld_r1_r2r4();
-	current_instruction.parameter_one = current_instruction.parameter_two;//REG_VAL(one) = REG_VAL(two);
-	current_instruction.parameter_three = current_instruction.parameter_four;//REG_VAL(three) = REG_VAL(four);
+	current_instruction.parameter_one = current_instruction.parameter_two;
+	current_instruction.parameter_three = current_instruction.parameter_four;
 	current_instruction.parameter_two = nullptr;
 	current_instruction.parameter_four = nullptr;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "PC:0x" << std::hex << PC << "-> INST:0x" << (uint16_t)current_opcode << "-> " <<
 		         current_instruction.opcode_name;
 #endif
@@ -356,14 +356,9 @@ void CPU::ld_r1r3_r2()
 	uint16_t memory_addr = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 	bus->write_memory(memory_addr, REG_VAL(two));
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR(memory_addr) << (uint16_t)REG_VAL(two) << 
 		        " = 0x" << (uint16_t)REG_VAL(two) << "\n";
-#else 
-	if (PC == 0xC089)
-	{
-		//log_file << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << (uint16_t)bus->read_memory(memory_addr) << "\n";
-	}
 #endif
 }
 
@@ -373,7 +368,7 @@ void CPU::ldd_r1r3_r2()
 {
 	ld_r1r3_r2();
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "PC:0x" << std::hex << PC << "-> INST:0x" << (uint16_t)current_opcode << "-> " <<
 		        current_instruction.opcode_name;
 #endif
@@ -387,7 +382,7 @@ void CPU::ldi_r1r3_r2()
 {
 	ld_r1r3_r2();
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "PC:0x" << std::hex << PC << "-> INST:0x" << (uint16_t)current_opcode << "-> " <<
 		         current_instruction.opcode_name;
 #endif
@@ -403,7 +398,7 @@ void CPU::ld_r1r3_n()
 	uint8_t  data = bus->read_memory(++PC);
 	bus->write_memory(memory_addr, data);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR(memory_addr) << "0x" << (uint16_t)data << "\n";
 #endif
 }
@@ -415,7 +410,7 @@ void CPU::ld_nn_r1()
 	uint16_t memory_addr = get_memory_address();
 	bus->write_memory(memory_addr, REG_VAL(one));
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR(memory_addr) << REG_NAME(one) <<
 		        " = 0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
@@ -429,15 +424,10 @@ void CPU::ldh_n_r1()
 	uint16_t memory_address = 0xFF00 + address_offset;
 	bus->write_memory(memory_address, REG_VAL(one));
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": ADDR[0xFF00  + 0x" << (uint16_t)address_offset << "] = " <<
 		        ADDR(memory_address) << REG_NAME(one) <<
 		        " = 0x" << (uint16_t)REG_VAL(one) << "\n";
-#else
-	if ((PC - 1) == 0xc59D)
-	{
-		//log_file << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (uint16_t)REG_VAL(one) << "\n";
-	}
 #endif
 }
 
@@ -448,7 +438,7 @@ void CPU::ld_r1r3_nn()
 	REG_VAL(three) = bus->read_memory(++PC);
 	REG_VAL(one) = bus->read_memory(++PC);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = 0x" << 
 		        combine_two_bytes(REG_VAL(one), REG_VAL(three)) << "\n";
 #endif
@@ -460,7 +450,7 @@ void CPU::ld_sp_nn()
 {
 	SP = get_memory_address();
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": SP = 0x" << SP << "\n";
 #endif
 }
@@ -470,7 +460,7 @@ void CPU::ld_sp_r1r3()
 {
 	SP = combine_two_bytes(REG_VAL(one), REG_VAL(three));
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": SP = " << REG_NAME(one) + REG_NAME(three) << " = 0x" << 
 		        SP << "\n";
 #endif
@@ -487,7 +477,7 @@ void CPU::ld_r1r3_sp_n()
 	REG_VAL(one) = result >> 8;
 	REG_VAL(three) = (result << 8) >> 8;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = SP + n = 0x" << 
 		        SP << " + 0x" << (((uint16_t)byte) & 0xFF) << " = 0x" << result << 
 		        F_REG_BITS << "\n";
@@ -504,7 +494,7 @@ void CPU::ld_nn_sp()
 	bus->write_memory(++memory_address, (SP & 0xFF00) >> 8);
 
 	
-#if defined DEBUG
+#if defined DEBUG_CPU
 	uint16_t memory_address_1 = --memory_address;
 	uint16_t memory_address_2 = ++memory_address;
 	log_file << ": " << ADDR(memory_address_1) << "0x" <<
@@ -522,16 +512,10 @@ void CPU::push_af()
 	uint8_t f_register = (F.Z << 7) | (F.N << 6) | (F.H << 5) | (F.C << 4);
 	bus->write_memory(--SP, f_register);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR_SP(SP + 1) << "A = 0x" << (uint16_t)A.register_value <<
 		        "\n\t\t\t\t" << ADDR_SP(SP) << "F = 0x" << 
 		        (uint16_t)f_register << F_REG_BITS << "\n";
-#else 
-	if (PC == 0xc510)
-	{
-		log_file << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (uint16_t)A.register_value <<
-			        std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (uint16_t)f_register << "\n";
-	}
 #endif
 }
 
@@ -542,7 +526,7 @@ void CPU::push_r1r3()
 	bus->write_memory(--SP, REG_VAL(one));
 	bus->write_memory(--SP, REG_VAL(three));
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR_SP(SP + 1) << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << 
 		        "\n\t\t\t\t" << ADDR_SP(SP) << REG_NAME(three) << " = 0x" <<
 		        (uint16_t)REG_VAL(three) << "\n";
@@ -559,7 +543,7 @@ void CPU::pop_af()
 	uint8_t data = bus->read_memory(SP++);
 	A.register_value = data;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": F = " << ADDR_SP(SP - 2) << "0x" <<  (uint16_t)f_data << 
 		        F_REG_BITS  << "\n\t\t\t       A = " << ADDR_SP(SP - 1) <<"0x" << 
 		        (uint16_t)A.register_value << "\n";
@@ -573,7 +557,7 @@ void CPU::pop_r1r3()
 	REG_VAL(three) = bus->read_memory(SP++);
 	REG_VAL(one) = bus->read_memory(SP++);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(three) << " = " << ADDR_SP(SP - 2) << "0x" << 
 		        (uint16_t)REG_VAL(three) << "\n\t\t\t       " << REG_NAME(one) <<
 		        " = " << ADDR_SP(SP - 1) << "0x" << (uint16_t)REG_VAL(one) << "\n";
@@ -590,7 +574,7 @@ void CPU::add_r1_r2()
 	set_f_register(result == 0, 0, is_half_carry(value_one, value_two), is_carry(value_one, value_two));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " + " << REG_NAME(two) <<
 		       " = 0x" << (uint16_t)value_one << " + 0x" << (uint16_t)value_two <<
 		       " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
@@ -608,7 +592,7 @@ void CPU::add_r1_r2r4()
 	set_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " + "<< ADDR(memory_address) << 
 		        "0x" << (uint16_t)register_value << " + 0x" << (uint16_t)data << 
 		        " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
@@ -625,7 +609,7 @@ void CPU::add_r1_n()
 	set_f_register(result == 0, 0, is_half_carry(data, register_value), is_carry(data, register_value));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) <<
 	 	        " + 0x" << (uint16_t)data << " = 0x" << (uint16_t)register_value <<
 		        " + 0x" << (uint16_t)data << " = 0x" << (uint16_t)result <<
@@ -649,7 +633,7 @@ void CPU::adc_r1_r2()
 		          value_one + value_two + carry > 0xFF);
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " <<  REG_NAME(one) << " = " << REG_NAME(one) << " + " << 
 		        REG_NAME(two) << " + F.C = 0x" << (uint16_t)value_one <<
 		        " + 0x" << (uint16_t)value_two << " + 0x" << (uint16_t)carry <<
@@ -671,7 +655,7 @@ void CPU::adc_r1_r2r4()
 		          register_value + data + carry > 0xFF);
 	REG_VAL(one) = result;
 	
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " + " << 
 		        ADDR(memory_address) << " + F.C = 0x" <<(uint16_t)register_value << 
 		        " + 0x"<< (uint16_t)data << " + 0x" << (uint16_t)carry << 
@@ -692,7 +676,7 @@ void CPU::adc_r1_n()
 		           register_value + data + carry > 0xFF);
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " + 0x" << 
 		        (uint16_t)data << " + F.C = 0x" << (uint16_t)register_value <<
 		        " + 0x" << (uint16_t)data << " + 0x" << (uint16_t)carry << " = 0x" << 
@@ -710,7 +694,7 @@ void CPU::sub_r1_r2()
 	set_f_register(result == 0, 1, is_half_borrow(value_one, value_two), is_borrow(value_one, value_two));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " - " << REG_NAME(two) <<
 		        " = 0x" << (uint16_t)value_one << " - 0x" << (uint16_t)value_two <<
 	  	        " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
@@ -728,7 +712,7 @@ void CPU::sub_r1_r2r4()
 	set_f_register(result == 0, 1, is_half_borrow(register_value, data), is_borrow(register_value, data));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " - " << ADDR(memory_address) <<
 		        "0x" << (uint16_t)register_value << " - 0x" << (uint16_t)data <<
 		        " = 0x" << (uint16_t)result << F_REG_BITS << "\n";
@@ -745,7 +729,7 @@ void CPU::sub_r1_n()
 	set_f_register(result == 0, 1, is_half_borrow(register_value, data), is_borrow(register_value, data));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) <<
 		        " - 0x" << (uint16_t)data << " = 0x" << (uint16_t)register_value <<
 		        " - 0x" << (uint16_t)data << " = 0x" << (uint16_t)result <<
@@ -767,7 +751,7 @@ void CPU::sbc_r1_r2()
 		          value_one < (value_two + carry));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " - (" <<
 		        REG_NAME(two) << " + F.C) = 0x" << (uint16_t)value_one <<
 		        " - (0x" << (uint16_t)value_two << " + 0x" << (uint16_t)carry <<
@@ -790,7 +774,7 @@ void CPU::sbc_r1_r2r4()
 		          register_value < (data + carry));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " - (" << "ADDR[0x" << 
 		        memory_address << "]" << " + F.C) = 0x" << (uint16_t)register_value <<
 		        " - (0x" << (uint16_t)data << " + 0x" << (uint16_t)carry <<
@@ -811,7 +795,7 @@ void CPU::sbc_r1_n()
 	               register_value < (data + carry));
 	REG_VAL(one) = result;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << REG_NAME(one) << " - (0x" <<
 		        (uint16_t)data << " + F.C) = 0x" << (uint16_t)register_value <<
 		        " - (0x" << (uint16_t)data << " + 0x" << (uint16_t)carry << ") = 0x" <<
@@ -827,7 +811,7 @@ void CPU::and_r1_r2()
 	REG_VAL(one) &= REG_VAL(two);
 	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
 
-#if DEBUG
+#if DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " &= "<< REG_NAME(two) << " = 0x" << 
 		        (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
@@ -842,7 +826,7 @@ void CPU::and_r1_r2r4()
 	REG_VAL(one) &= data;
 	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
 	
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " &= " << ADDR(memory_address) <<
 		        REG_NAME(one) << " & 0x" << (uint16_t)data << " = 0x" <<
 		        (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
@@ -857,7 +841,7 @@ void CPU::and_r1_n()
 	REG_VAL(one) &= data;
 	set_f_register(REG_VAL(one) == 0, 0, 1, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " &= 0x" << (uint16_t)data << 
 		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
@@ -870,7 +854,7 @@ void CPU::or_r1_r2()
 	REG_VAL(one) |= REG_VAL(two);
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " |= " << REG_NAME(two) << 
 		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
@@ -885,7 +869,7 @@ void CPU::or_r1_r2r4()
 	REG_VAL(one) |= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " |= " << ADDR(memory_address) <<
 		        REG_NAME(one) << " | " << (uint16_t)data << " = 0x" <<
 		        (uint16_t)REG_VAL(one)<< F_REG_BITS << "\n";
@@ -900,7 +884,7 @@ void CPU::or_r1_n()
 	REG_VAL(one) |= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " |= 0x" << (uint16_t)data <<
 		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
@@ -913,7 +897,7 @@ void CPU::xor_r1_r2()
 	REG_VAL(one) ^= REG_VAL(two);
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
-#if defined DEBUG 
+#if defined DEBUG_CPU 
 	log_file << ": " << REG_NAME(one) << " ^= " << REG_NAME(two) <<
 		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
@@ -928,7 +912,7 @@ void CPU::xor_r1_r2r4()
 	REG_VAL(one) ^= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " ^= " << ADDR(memory_address) <<
 		        REG_NAME(one) << " ^ " << (uint16_t)data << " = 0x" <<
 		        (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
@@ -943,7 +927,7 @@ void CPU::xor_r1_n()
 	REG_VAL(one) ^= data;
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " ^= 0x" << (uint16_t)data <<
 		        " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
@@ -956,7 +940,7 @@ void CPU::cp_r1_r2()
 	uint8_t result = REG_VAL(one) - REG_VAL(two);
 	set_f_register(result == 0, 1, is_half_borrow(REG_VAL(one), REG_VAL(two)), REG_VAL(one) < REG_VAL(two));
 	
-#if defined DEBUG 
+#if defined DEBUG_CPU 
 	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << 
 		        " " << REG_NAME(two) << " = 0x" << (uint16_t)REG_VAL(two) << 
 		        F_REG_BITS << "\n";
@@ -972,7 +956,7 @@ void CPU::cp_r1_r2r4()
 	uint8_t  result = REG_VAL(one) - data;
 	set_f_register(result == 0, 1, is_half_borrow(REG_VAL(one), data), REG_VAL(one) < data);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_VAL(one) << " = 0x" << (uint16_t)REG_VAL(one) << 
 		        ADDR(memory_address) << "0x" << (uint16_t)data << 
 		        F_REG_BITS << "\n";
@@ -988,7 +972,7 @@ void CPU::cp_r1_n()
 	uint8_t result = register_value - data;
 	set_f_register(result == 0, 1, is_half_borrow(register_value, data), REG_VAL(one) < data);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR(PC) << "0x" << (uint16_t)data << F_REG_BITS << "\n";
 #endif
 }
@@ -1000,7 +984,7 @@ void CPU::inc_r1()
 	set_f_register((uint8_t)(REG_VAL(one) + 1) == 0, 0, is_half_carry(REG_VAL(one), 1), F.C);
 	REG_VAL(one)++;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_REG_VALUE_CHANGE(one, REG_VAL(one) - 1) << F_REG_BITS << "\n";
 #endif
 }
@@ -1015,7 +999,7 @@ void CPU::inc_r2r4()
 	data++;
 	bus->write_memory(memory_address, data);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_MEM_VALUE_CHANGE(memory_address, data - 1) << F_REG_BITS << "\n";
 #endif
 }
@@ -1027,7 +1011,7 @@ void CPU::dec_r1()
 	set_f_register((uint8_t)(REG_VAL(one) - 1) == 0, 1, is_half_borrow(REG_VAL(one), 1), F.C);
 	REG_VAL(one)--;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_REG_VALUE_CHANGE(one, REG_VAL(one) + 1) << F_REG_BITS << "\n";
 #endif
 }
@@ -1042,7 +1026,7 @@ void CPU::dec_r2r4()
 	data--;
 	bus->write_memory(memory_address, data);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_MEM_VALUE_CHANGE(memory_address, (uint8_t)(data + 1)) << F_REG_BITS << "\n";
 #endif
 }
@@ -1058,7 +1042,7 @@ void CPU::add_r1r3_r2r4()
 	REG_VAL(one) = result >> 8;
 	REG_VAL(three) = result & 0xFF;
 
-#if defined DEBUG 
+#if defined DEBUG_CPU 
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = " << REG_NAME(one) + REG_NAME(three) <<
 		        " + " << REG_NAME(two) + REG_NAME(four) << " = 0x" << register_one <<
 		        " + 0x" << register_two << " = 0x" << result << F_REG_BITS << "\n";
@@ -1075,7 +1059,7 @@ void CPU::add_r1r3_sp()
 	REG_VAL(one) = result >> 8;
 	REG_VAL(three) = result & 0xFF;
 
-#if defined DEBUG 
+#if defined DEBUG_CPU 
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = " << REG_NAME(one) + REG_NAME(three) <<
 		        " + SP" << " = 0x" << register_one << " + 0x" << SP << " = 0x" << 
 		        result << F_REG_BITS << "\n";
@@ -1088,7 +1072,7 @@ void CPU::ld_a_c_io()
 	uint16_t memory_address = 0xFF00 + REG_VAL(two);
 	REG_VAL(one) = bus->read_memory(memory_address);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = ADDR[0xFF00 + " << REG_NAME(two) <<
 		        "] = " << ADDR(memory_address) << "0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
@@ -1102,7 +1086,7 @@ void CPU::ld_c_a_io()
 	uint8_t  data = REG_VAL(two);
 	bus->write_memory(memory_address, data);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": ADDR[0xFF00 + " << REG_NAME(one) <<"] =" << 
 		        ADDR(memory_address) << REG_NAME(two) << 
  		        " = 0x" << (uint16_t)data << "\n";
@@ -1117,7 +1101,7 @@ void CPU::add_sp_n()
 	uint16_t result = SP + byte;
 	set_f_register(0, 0, is_half_carry_signed(byte, SP), is_carry_signed(byte, SP));
 	
-#if defined DEBUG 
+#if defined DEBUG_CPU 
 	log_file << ": SP = 0x" << SP << " + 0x" << (((uint16_t)byte) & 0xFF) <<
 		        " = 0x" << result << F_REG_BITS << "\n";
 #endif
@@ -1134,7 +1118,7 @@ void CPU::inc_r1r3()
 	REG_VAL(one) = register_data >> 8;
 	REG_VAL(three) = (register_data << 8) >> 8;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = 0x" << 
 		        register_data - 1 << " -> 0x" << register_data << "\n";
 #endif
@@ -1146,7 +1130,7 @@ void CPU::inc_sp()
 {
 	SP++;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": SP = 0x" << SP - 1 << " -> 0x" << SP << "\n";
 #endif
 }
@@ -1160,7 +1144,7 @@ void CPU::dec_r1r3()
 	REG_VAL(one) = register_data >> 8;
 	REG_VAL(three) = (register_data << 8) >> 8;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) + REG_NAME(three) << 
 		        " = 0x" << register_data + 1 << " -> 0x" << register_data << "\n";
 #endif
@@ -1172,7 +1156,7 @@ void CPU::dec_sp()
 {
 	SP--;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": SP = 0x" << SP + 1 << " -> 0x" << SP << "\n";
 #endif
 }
@@ -1215,7 +1199,7 @@ void CPU::daa()
 
 	set_f_register(A.register_value == 0, F.N, 0, carry);
 	
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": A = 0x" <<(uint16_t)register_value << " -> 0x" << (uint16_t)A.register_value <<
 		        F_REG_BITS << "\n";
 #endif
@@ -1228,7 +1212,7 @@ void CPU::cpl()
 	A.register_value = ~A.register_value;
 	set_f_register(F.Z, 1, 1, F.C);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": A = 0x" << (uint16_t)(~A.register_value) << " -> 0x" << (uint16_t)A.register_value <<
 		        F_REG_BITS << "\n";
 #endif
@@ -1240,7 +1224,7 @@ void CPU::ccf()
 {
 	set_f_register(F.Z, 0, 0, F.C ? 0 : 1);
 
-#if defined DEBUG 
+#if defined DEBUG_CPU 
 	log_file << ": F.C = 0x" << (uint16_t)(F.C ? 0 : 1) << " -> 0x" << (uint16_t)F.C <<
 		        F_REG_BITS << "\n";
 #endif
@@ -1252,7 +1236,7 @@ void CPU::scf()
 {
 	set_f_register(F.Z, 0, 0, 1);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << F_REG_BITS << "\n";
 #endif
 }
@@ -1262,7 +1246,7 @@ void CPU::scf()
 void CPU::nop()
 {
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "\n";
 #endif
 }
@@ -1274,7 +1258,7 @@ void CPU::halt()
 	halted = true;
 //	assert(false); // Check how this instruction should be working
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "\n";
 #endif
 }
@@ -1285,7 +1269,7 @@ void CPU::stop()
 {
 	//assert(false); // Implement this later
 	halted = true;
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "\n";
 #endif
 }
@@ -1296,7 +1280,7 @@ void CPU::di()
 {
 	IME = false;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "\n";
 #endif
 }
@@ -1307,7 +1291,7 @@ void CPU::ei()
 {
 	IME = true;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "\n";
 #endif
 }
@@ -1318,7 +1302,7 @@ void CPU::jp_nn()
 {
 	PC = get_memory_address() - 1;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_JUMP;
 #endif
 }
@@ -1339,7 +1323,7 @@ void CPU::jp_cc_nn()
 	}
 	
 	
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_CONDITIONAL_JUMP;
 #endif
 }
@@ -1350,7 +1334,7 @@ void CPU::jp_hl()
 {
 	PC = combine_two_bytes(REG_VAL(one), REG_VAL(three)) - 1;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_JUMP;
 #endif
 }
@@ -1363,7 +1347,7 @@ void CPU::jr_n()
 	PC += offset + 2; // adding 2 to include this opcode and its operand
 	PC -= 1;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_JUMP;
 #endif
 }
@@ -1384,7 +1368,7 @@ void CPU::jr_cc_n()
 		PC++;
 	}
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_CONDITIONAL_JUMP;
 #endif
 }
@@ -1401,7 +1385,7 @@ void CPU::call_nn()
 	bus->write_memory(--SP, (PC + 3) & 0x00FF);
 	PC = get_memory_address() - 1;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR_SP(SP + 1) <<  " 0x" << (uint16_t)bus->read_memory(SP + 1) << 
 		        "\n\t\t\t\t  " << ADDR_SP(SP) << " 0x" << (uint16_t)bus->read_memory(SP) <<
 		        "\n\t\t\t\t  JUMP" << LOG_JUMP;
@@ -1422,7 +1406,7 @@ void CPU::call_cc()
 		PC += 2;
 	}
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	if (!jump)
 	{
 		log_file << F_REG_BITS << " : Jump is ignored\n";
@@ -1439,7 +1423,7 @@ void CPU::rst()
 	uint8_t offset = get_restart_offset();
 	PC = 0x0000 + offset - 1;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR_SP(SP + 1) << "0x" << (uint16_t)bus->read_memory(SP + 1) <<
                 "\n\t\t\t\t  " << ADDR_SP(SP) << " 0x" << (uint16_t)bus->read_memory(SP) <<
 		        "\n\t\t\t\t  JUMP" << LOG_JUMP;
@@ -1455,7 +1439,7 @@ void CPU::ret()
 	memory_address = bus->read_memory(SP++) | (bus->read_memory(SP++) << 8);
 	PC = memory_address - 1;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_JUMP;
 #endif
 }
@@ -1470,7 +1454,7 @@ void CPU::ret_cc()
 		ret();
 	}
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	if (!jump)
 	{
 		log_file << F_REG_BITS << " : Jump is ignored\n";
@@ -1484,7 +1468,7 @@ void CPU::ret_cc()
 void CPU::reti()
 {
 	ret();
-#if defined DEBUG 
+#if defined DEBUG_CPU 
 	log_file << "\t\t\t  EI";
 #endif
 	ei();

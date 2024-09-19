@@ -10,6 +10,7 @@
 #include "opcodes.h"
 #include "cb_opcodes.h"
 
+
 class CPU
 {
 public: 
@@ -79,6 +80,8 @@ private:
 	void init_cb_instruction_table();
 
 #if defined DEBUG
+	std::ofstream log_file;
+#else
 	std::ofstream log_file;
 #endif
 	void tick();

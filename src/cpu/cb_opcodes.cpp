@@ -279,17 +279,16 @@ void CPU::swap_r1()
 // Swap upper and lower bytes of 16-bit r1r3 register
 void CPU::swap_r1r3()
 {
-	uint16_t register_value = combine_two_bytes(REG_VAL(one), REG_VAL(three));
-	REG_VAL(one) = register_value & 0x00FF;
-	REG_VAL(three) = (register_value & 0xFF00) >> 8;
-	set_f_register(combine_two_bytes(REG_VAL(one), REG_VAL(three)), 0, 0, 0);
+	uint16_t memory_address = combine_two_bytes(REG_VAL(one), REG_VAL(three));
+	uint8_t  data = bus->read_memory(memory_address);
+	bus->write_memory(memory_address, (data << 4) | (data >> 4));
+	set_f_register(bus->read_memory(memory_address) == 0, 0, 0, 0);
 
 #if defined DEBUG
-	log_file << ": " << REG_NAME(one) + REG_NAME(three) << " = 0x" << register_value <<
-		        " -> 0x" << combine_two_bytes(REG_VAL(one), REG_VAL(three)) << 
-		        F_REG_BITS << "\n";
+	log_file << ": " << LOG_MEM_VALUE_CHANGE(memory_address, data) << F_REG_BITS << "\n";
 #endif
 }
+
 
 // Wrap function for shifting/rotating bits in register
 template <typename BIT_OPERATION>
@@ -297,7 +296,14 @@ void CPU::register_bit_shift(BIT_OPERATION bit_operation, uint8_t carry_bit)
 {
 	uint8_t register_value = REG_VAL(one);
 	REG_VAL(one) = bit_operation(register_value);
-	set_f_register(REG_VAL(one) == 0, 0, 0, register_value & carry_bit);
+	if (cb_instruction)
+	{
+		set_f_register(REG_VAL(one) == 0, 0, 0, register_value & carry_bit);
+	}
+	else
+	{
+		set_f_register(0, 0, 0, register_value & carry_bit);
+	}
 
 #if defined DEBUG
 	log_file << LOG_BIT_SHIFT(one, register_value);

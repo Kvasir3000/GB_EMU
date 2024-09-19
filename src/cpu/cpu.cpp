@@ -41,6 +41,7 @@ void CPU::tick()
 	}
 }
 
+
 void CPU::fetch_opcode()
 {
 	current_opcode = bus->read_memory(PC);
@@ -50,6 +51,8 @@ void CPU::fetch_opcode()
 		cb_instruction = true;
 	}
 };
+
+
 
 void CPU::decode_instruction()
 {
@@ -62,12 +65,10 @@ void CPU::decode_instruction()
 		current_instruction = instruction_table_map[current_opcode];
 	}
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << "PC:0x" << std::hex << PC << "-> INST:0x" << std::setw(2) << std::setfill('0') << 
 		         (cb_instruction? "CB" : "") << (uint16_t)current_opcode << "-> " << 
 		         current_instruction.opcode_name;
-#else 
-	//log_file << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << PC << "\n";
 #endif
 }
 

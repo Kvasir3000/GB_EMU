@@ -8,12 +8,14 @@ void CPU::set_f_register(bool z, bool n, bool h, bool c)
 	F.C = c;
 }
 
+
 uint16_t CPU::get_memory_address()
 {
 	uint8_t low_byte = bus->read_memory(++PC);
 	uint8_t high_byte = bus->read_memory(++PC);
 	return combine_two_bytes(high_byte, low_byte);
 }
+
 
 bool CPU::check_jump_condition()
 {

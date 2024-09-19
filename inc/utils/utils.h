@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-// Util macro to access registers in instructions
+// Util macro to access register value in instructions
 #define REG_VAL(parameter_value)   current_instruction.parameter_##parameter_value->register_value
 
 uint16_t combine_two_bytes(uint8_t high_byte, uint8_t low_byte);
