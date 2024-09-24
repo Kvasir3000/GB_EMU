@@ -7,9 +7,10 @@
 #include "bus.h"
 
 
+
 void read_cpu_program(std::vector<uint8_t>&program_data)
 {
-    std::string test_path = "../tests/cpu/Blarggs/cpu_instrs.gb";
+    std::string test_path = "../tests/cpu/Blarggs/02-interrupts.gb";
     std::ifstream file(test_path, std::ios::binary);
     if (file.is_open())
     {
@@ -25,6 +26,7 @@ void read_cpu_program(std::vector<uint8_t>&program_data)
         std:: cout << "Unable to open file: " << test_path << "\n";
     }
 }
+
 
 int main()
 {

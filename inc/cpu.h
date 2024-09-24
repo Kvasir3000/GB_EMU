@@ -4,12 +4,21 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include <chrono>
+#include <thread>
 #include "bus.h"
+#include "common/timers.h"
+#include "common/interrupts.h"
 #include "utils/utils.h"
 #include "utils/debug.h"
 #include "opcodes.h"
 #include "cb_opcodes.h"
 
+
+#define CPU_FREQ_HZ         4194304
+#define CPU_CLOCK_TICK_TIME 1.0f / CPU_FREQ_HZ
+#undef  DEBUG_CPU
+#define DEBUG_TIMERS
 
 class CPU
 {
@@ -44,17 +53,22 @@ private:
 		uint8_t C : 1;
 		uint8_t free_bits : 4;
 	} F;
-	void set_f_register(bool z, bool n, bool h, bool c);
+	
 
 	uint16_t PC;
 	uint16_t SP;
+	
+	// Miscellaneous functions
+	void     set_f_register(bool z, bool n, bool h, bool c);
 	uint16_t get_memory_address();
-	bool check_jump_condition();
-	uint8_t get_bit_mask(uint16_t offset);
-	uint8_t get_restart_offset();
+	uint8_t  get_bit_mask(uint16_t offset);
+	uint8_t  get_restart_offset();
+	uint32_t get_tima_frequency(uint8_t clock);
+	bool     check_jump_condition();
 
-	bool IME;
 
+
+ 
 	BUS* bus;
 
 	struct INSTRUCTION
@@ -70,27 +84,49 @@ private:
 		void (CPU::* function_ptr)();
 	};
 
-	uint8_t current_opcode;
-	INSTRUCTION current_instruction;
-	bool cb_instruction;
+	enum CONDITIONAL_INSTRUCTION_PHASE
+	{
+		PHASE_ONE,
+		PHASE_TWO
+	};
+
+	uint8_t                       current_opcode;
+	INSTRUCTION                   current_instruction;
+	bool                          cb_instruction;
+	CONDITIONAL_INSTRUCTION_PHASE current_phase;
 
 	INSTRUCTION instruction_table_map[0x100];
 	INSTRUCTION cb_instruction_table_map[0x100];
-	void init_instruction_table();
-	void init_cb_instruction_table();
+	void        init_instruction_table();
+	void        init_cb_instruction_table();
 
 #if defined DEBUG
 	std::ofstream log_file;
 #else
 	std::ofstream log_file;
 #endif
+
+	// Fetch-execute
 	void tick();
 	void fetch_opcode();
 	void decode_instruction();
 	void execute();
+
+	// Timers 
+	uint16_t div_counter;
+	uint16_t tima_counter;
+	uint8_t  reload_tima_cycles;
+	bool     reload_tima;
+	void     update_timers();
+	void     update_div();
+	void     update_tima();
+
+	void push_current_pc();
+	void handle_interrupts();
+	bool IME;
 	bool halted;
 
-
+	// Instuctions
 	void ld_r1_n();
 	void ld_r1_nn();
 	void ldh_r1_n();

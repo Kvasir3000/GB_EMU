@@ -18,6 +18,6 @@ set( SOURCES
 add_executable(GB_EMU ${SOURCES})
 include_directories(inc)
 
-target_compile_definitions(GB_EMU PUBLIC DEBUG) 
+target_compile_definitions(GB_EMU PUBLIC DEBUG_CPU) 
 
 

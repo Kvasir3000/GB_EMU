@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include <vector>
+#include "common/timers.h"
+#include "common/interrupts.h"
 
 #define SB  0xFF01
 #define SC  0xFF02
@@ -12,6 +14,8 @@ public:
 	BUS(std::vector<uint8_t> program_data);
 	uint8_t read_memory(uint64_t memory_addr);
 	void write_memory(uint64_t memory_addr, uint8_t data);
+	void increment_div();
+	void increment_tima();
 private:
 	 /*
      * For now it stores the memory of the whole system, as I am just implementing CPU at the moment

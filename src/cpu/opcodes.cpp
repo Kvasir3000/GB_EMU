@@ -218,21 +218,21 @@ void CPU::init_instruction_table()
 	instruction_table_map[RRCA] =       { "RRCA",       4,  &A,      nullptr, nullptr, nullptr, &CPU::rrc_r1 };
 	instruction_table_map[RRA] =        { "RRA",        4,  &A,      nullptr, nullptr, nullptr, &CPU::rr_r1 };
 	instruction_table_map[JP_nn] =      { "JP",         16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_nn };
-	instruction_table_map[JP_NZ] =      { "JP_NZ",      16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
-	instruction_table_map[JP_Z] =       { "JP_Z",       16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
-	instruction_table_map[JP_NC] =      { "JP_NC",      16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
-	instruction_table_map[JP_C] =       { "JP_C",       16, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_NZ] =      { "JP_NZ",      12, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_Z] =       { "JP_Z",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_NC] =      { "JP_NC",      12, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
+	instruction_table_map[JP_C] =       { "JP_C",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jp_cc_nn };
 	instruction_table_map[JP_HL] =      { "JP_HL",      4,  &H,      nullptr, &L,      nullptr, &CPU::jp_hl };
 	instruction_table_map[JR_n] =       { "JR_n",       8,  nullptr, nullptr, nullptr, nullptr, &CPU::jr_n };
-	instruction_table_map[JR_NZ] =      { "JR_NZ",      12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
-	instruction_table_map[JR_Z] =       { "JR_Z",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
-	instruction_table_map[JR_NC] =      { "JR_NC",      12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
-	instruction_table_map[JR_C] =       { "JR_C",       12, nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
-	instruction_table_map[CALL_nn] =    { "CALL_nn",    24, nullptr, nullptr, nullptr, nullptr, &CPU::call_nn };
-	instruction_table_map[CALL_NZ] =    { "CALL_NZ",    24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
-	instruction_table_map[CALL_Z] =     { "CALL_Z",     24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
-	instruction_table_map[CALL_NC] =    { "CALL_NC",    24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
-	instruction_table_map[CALL_C] =     { "CALL_C",     24, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[JR_NZ] =      { "JR_NZ",      8,  nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+	instruction_table_map[JR_Z] =       { "JR_Z",       8,  nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+	instruction_table_map[JR_NC] =      { "JR_NC",      8,  nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+	instruction_table_map[JR_C] =       { "JR_C",       8,  nullptr, nullptr, nullptr, nullptr, &CPU::jr_cc_n };
+	instruction_table_map[CALL_nn] =    { "CALL_nn",    12, nullptr, nullptr, nullptr, nullptr, &CPU::call_nn };
+	instruction_table_map[CALL_NZ] =    { "CALL_NZ",    12, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[CALL_Z] =     { "CALL_Z",     12, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[CALL_NC] =    { "CALL_NC",    12, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
+	instruction_table_map[CALL_C] =     { "CALL_C",     12, nullptr, nullptr, nullptr, nullptr, &CPU::call_cc };
 	instruction_table_map[RST_00] =     { "RST_00",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
 	instruction_table_map[RST_08] =     { "RST_08",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
 	instruction_table_map[RST_10] =     { "RST_10",     32, nullptr, nullptr, nullptr, nullptr, &CPU::rst };
@@ -1269,6 +1269,8 @@ void CPU::stop()
 {
 	//assert(false); // Implement this later
 	halted = true;
+	bus->write_memory(DIV, 0x0);
+
 #if defined DEBUG_CPU
 	log_file << "\n";
 #endif
@@ -1292,7 +1294,7 @@ void CPU::ei()
 	IME = true;
 
 #if defined DEBUG_CPU
-	log_file << "\n";
+	log_file << " : IE=0x" << (uint16_t)bus->read_memory(IE) << " IF=0x" << (uint16_t)bus->read_memory(IF) << "\n";
 #endif
 }
 
@@ -1311,16 +1313,35 @@ void CPU::jp_nn()
 // Jump to address provided in next two bytes of memory, if the condition is true
 void CPU::jp_cc_nn()
 {
-	bool jump = check_jump_condition();
-
-	if (jump)
+	bool jump = false;
+	if (current_phase == PHASE_ONE)
+	{
+		jump = check_jump_condition();
+		if (jump)
+		{
+			current_instruction.number_of_cycles = 4;
+			PC--;
+			current_phase = PHASE_TWO;
+		}
+		else
+		{
+			PC += 2;
+		}
+	}
+	else if (current_phase == PHASE_TWO)
 	{
 		PC = get_memory_address() - 1;
-    }
-	else
-	{
-		PC += 2;
+		current_phase = PHASE_ONE;
 	}
+
+	//if (jump)
+	//{
+	//	PC = get_memory_address() - 1;
+ //   }
+	//else
+	//{
+	//	PC += 2;
+	//}
 	
 	
 #if defined DEBUG_CPU
@@ -1356,17 +1377,39 @@ void CPU::jr_n()
 // Add n to current program counter and jump to it, if the condition is true
 void CPU::jr_cc_n()
 {
-	bool jump = check_jump_condition();
-	if (jump)
+	bool jump = false;
+	if (current_phase == PHASE_ONE)
+	{
+		jump = check_jump_condition();
+		if (jump)
+		{
+			current_instruction.number_of_cycles = 4;
+			PC--;
+			current_phase = PHASE_TWO;
+		}
+		else
+		{
+			PC++;
+		}
+	}
+	else if (current_phase == PHASE_TWO)
 	{
 		int8_t offset = bus->read_memory(PC + 1);
-		PC += offset + 2; // adding 2 to include this opcode and its operand;
-		PC -= 1;
+		PC += offset + 1; // adding to include this opcode and its operand;
+		//PC -= 1;
+		current_phase = PHASE_ONE;
 	}
-	else
-	{
-		PC++;
-	}
+	//bool jump = check_jump_condition();
+	//if (jump)
+	//{
+	//	int8_t offset = bus->read_memory(PC + 1);
+	//	PC += offset + 2; // adding 2 to include this opcode and its operand;
+	//	PC -= 1;
+	//}
+	//else
+	//{
+	//	PC++;
+	//}
 
 #if defined DEBUG_CPU
 	log_file << LOG_CONDITIONAL_JUMP;
@@ -1396,15 +1439,35 @@ void CPU::call_nn()
 // Push current address onto stack and jump to nn address, if the condition is true
 void CPU::call_cc()
 {
-	bool jump = check_jump_condition();
-	if (jump)
+	bool jump = false;
+	if (current_phase == PHASE_ONE)
+	{
+		jump = check_jump_condition();
+		if (jump)
+		{
+			current_instruction.number_of_cycles = 12;
+			PC--;
+			current_phase = PHASE_TWO;
+		}
+		else
+		{
+			PC += 2;
+		}
+	}
+	else if (current_phase == PHASE_TWO)
 	{
 		call_nn();
+		current_phase = PHASE_ONE;
 	}
-	else
-	{
-		PC += 2;
-	}
+	//bool jump = check_jump_condition();
+	//if (jump)
+	//{
+	//	call_nn();
+	//}
+	//else
+	//{
+	//	PC += 2;
+	//}
 
 #if defined DEBUG_CPU
 	if (!jump)
@@ -1448,11 +1511,27 @@ void CPU::ret()
 // Pop two bytes from the stack and jump to this address, if condition is true
 void CPU::ret_cc()
 {
-	bool jump = check_jump_condition();
-	if (jump)
+	bool jump = false;
+	if (current_phase == PHASE_ONE)
+	{
+		jump = check_jump_condition();
+		if (jump)
+		{
+			current_instruction.number_of_cycles = 12;
+			PC--;
+			current_phase = PHASE_TWO;
+		}
+	}
+	else if (current_phase == PHASE_TWO)
 	{
 		ret();
+		current_phase = PHASE_ONE;
 	}
+	//bool jump = check_jump_condition();
+	//if (jump)
+	//{
+	//	ret();
+	//}
 
 #if defined DEBUG_CPU
 	if (!jump)
@@ -1468,9 +1547,11 @@ void CPU::ret_cc()
 void CPU::reti()
 {
 	ret();
+
 #if defined DEBUG_CPU 
 	log_file << "\t\t\t  EI";
 #endif
+
 	ei();
 }
 

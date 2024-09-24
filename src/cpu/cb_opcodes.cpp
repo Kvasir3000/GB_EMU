@@ -269,7 +269,7 @@ void CPU::swap_r1()
 	REG_VAL(one) = (register_value << 4) | (register_value >> 4);
 	set_f_register(REG_VAL(one) == 0, 0, 0, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)register_value << 
 		        " -> 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
@@ -284,7 +284,7 @@ void CPU::swap_r1r3()
 	bus->write_memory(memory_address, (data << 4) | (data >> 4));
 	set_f_register(bus->read_memory(memory_address) == 0, 0, 0, 0);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << LOG_MEM_VALUE_CHANGE(memory_address, data) << F_REG_BITS << "\n";
 #endif
 }
@@ -305,7 +305,7 @@ void CPU::register_bit_shift(BIT_OPERATION bit_operation, uint8_t carry_bit)
 		set_f_register(0, 0, 0, register_value & carry_bit);
 	}
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_BIT_SHIFT(one, register_value);
 #endif
 };
@@ -320,7 +320,7 @@ void CPU::memory_data_bit_shift(BIT_OPERATION bit_operation, uint8_t carry_bit)
 	bus->write_memory(memory_address, bit_operation(data));
 	set_f_register(bus->read_memory(memory_address) == 0, 0, 0, data & carry_bit);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_BIT_SHIFT_ADDR(memory_address, data);
 #endif
 };
@@ -443,7 +443,7 @@ void CPU::bit_r1()
 	uint8_t bit_mask = get_bit_mask(0x40);
 	set_f_register((REG_VAL(one) & bit_mask)  == 0, 0, 1, F.C);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = 0x" << (uint16_t)REG_VAL(one) << F_REG_BITS << "\n";
 #endif
 }
@@ -457,7 +457,7 @@ void CPU::bit_r1r3()
 	uint8_t bit_mask = get_bit_mask(0x40);
 	set_f_register((data & bit_mask) == 0, 0, 1, F.C);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << ": " << ADDR(memory_address) << "0x" << data << F_REG_BITS << "\n";
 #endif
 }
@@ -470,7 +470,7 @@ void CPU::set_r1()
 	uint8_t register_value = REG_VAL(one);
 	REG_VAL(one) |= bit_mask;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_REG_VALUE_CHANGE(one, register_value) << "\n";
 #endif
 }
@@ -485,7 +485,7 @@ void CPU::set_r1r3()
 	uint8_t bit_mask = get_bit_mask(0xC0);
 	bus->write_memory(memory_address, data | bit_mask);
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_MEM_VALUE_CHANGE(memory_address, data) << "\n";
 #endif
 }
@@ -498,7 +498,7 @@ void CPU::res_r1()
 	uint8_t register_value = REG_VAL(one);
 	REG_VAL(one) &= ~bit_mask;
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_REG_VALUE_CHANGE(one, register_value) << "\n";
 #endif
 }
@@ -512,7 +512,7 @@ void CPU::res_r1r3()
 	uint8_t bit_mask = get_bit_mask(0x80);
 	bus->write_memory(memory_address, data & (~bit_mask));
 
-#if defined DEBUG
+#if defined DEBUG_CPU
 	log_file << LOG_MEM_VALUE_CHANGE(memory_address, data) << "\n";
 #endif
 }
