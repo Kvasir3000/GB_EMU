@@ -19,6 +19,8 @@ BUS::BUS(std::vector<uint8_t> program_data)
 	ram[TAC] = 0xF8;
 	ram[IF] = 0xE1;
 	ram[IE] = 0x00;
+	system_counter = 0xABCC;
+	falling_edge_state = false;
 };
 
 uint8_t BUS::read_memory(uint64_t memory_addr)
@@ -31,6 +33,12 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 	if (memory_addr == DIV)
 	{
 		ram[DIV] = 0;
+		system_counter = 0;
+	}
+	else if (memory_addr == TAC)
+	{
+		falling_edge_state &= ((data & TAC_ENABLE_MASK) >> 2);
+		ram[TAC] = data;
 	}
 	else
 	{
@@ -48,13 +56,24 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 };
 
 
-void BUS::increment_div()
+void BUS::increment_system_counter()
 {
-	ram[DIV]++;
+	system_counter++;
 }
 
 
-void BUS::increment_tima()
+uint16_t BUS::read_system_counter()
 {
-	ram[TIMA]++;
+	return system_counter;
+}
+
+
+bool BUS::read_falling_edge_state()
+{
+	return falling_edge_state;
+}
+
+void BUS::write_falling_edge_state(bool falling_edge_state)
+{
+	this->falling_edge_state = falling_edge_state;
 }

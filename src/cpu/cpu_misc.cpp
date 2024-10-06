@@ -57,31 +57,3 @@ uint8_t CPU::get_restart_offset()
 	return offset;
 }
 
-
-uint32_t CPU::get_tima_frequency(uint8_t clock)
-{
-	if (clock == TAC_CLOCK_00_4096_HZ)
-	{
-		return CPU_FREQ_HZ / 4096;
-	}
-	else if (clock == TAC_CLOCK_01_262144_HZ)
-	{
-		return CPU_FREQ_HZ / 262144;
-	}
-	else if (clock == TAC_CLOCK_10_65536_HZ)
-	{
-		return CPU_FREQ_HZ / 65536;
-	}
-	else if (clock == TAC_CLOCK_11_16384_HZ)
-	{
-		return CPU_FREQ_HZ / 16384;
-	}
-	return 0;
-}
-
-
-void CPU::push_current_pc()
-{
-	bus->write_memory(--SP, (PC & 0xFF00) >> 8);
-	bus->write_memory(--SP, PC & 0x00FF);
-}

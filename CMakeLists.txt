@@ -13,6 +13,7 @@ set( SOURCES
 	src/cpu/cb_opcodes.cpp
         src/cpu/cpu_misc.cpp
 	src/bus.cpp
+	src/timers.cpp
 	src/utils/utils.cpp
 )
 add_executable(GB_EMU ${SOURCES})

@@ -4,21 +4,17 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
-#include <chrono>
-#include <thread>
 #include "bus.h"
-#include "common/timers.h"
-#include "common/interrupts.h"
+#include "common/timers_defs.h"
+#include "common/interrupts_defs.h"
 #include "utils/utils.h"
 #include "utils/debug.h"
 #include "opcodes.h"
 #include "cb_opcodes.h"
+#include "timers.h"
 
+#undef DEBUG_CPU
 
-#define CPU_FREQ_HZ         4194304
-#define CPU_CLOCK_TICK_TIME 1.0f / CPU_FREQ_HZ
-#undef  DEBUG_CPU
-#define DEBUG_TIMERS
 
 class CPU
 {
@@ -63,13 +59,10 @@ private:
 	uint16_t get_memory_address();
 	uint8_t  get_bit_mask(uint16_t offset);
 	uint8_t  get_restart_offset();
-	uint32_t get_tima_frequency(uint8_t clock);
 	bool     check_jump_condition();
-
-
-
  
-	BUS* bus;
+	BUS*       bus;
+	TIMERS     timers;
 
 	struct INSTRUCTION
 	{
@@ -84,16 +77,9 @@ private:
 		void (CPU::* function_ptr)();
 	};
 
-	enum CONDITIONAL_INSTRUCTION_PHASE
-	{
-		PHASE_ONE,
-		PHASE_TWO
-	};
-
-	uint8_t                       current_opcode;
-	INSTRUCTION                   current_instruction;
-	bool                          cb_instruction;
-	CONDITIONAL_INSTRUCTION_PHASE current_phase;
+	uint8_t     current_opcode;
+	INSTRUCTION current_instruction;
+	bool        cb_instruction;
 
 	INSTRUCTION instruction_table_map[0x100];
 	INSTRUCTION cb_instruction_table_map[0x100];
@@ -112,17 +98,8 @@ private:
 	void decode_instruction();
 	void execute();
 
-	// Timers 
-	uint16_t div_counter;
-	uint16_t tima_counter;
-	uint8_t  reload_tima_cycles;
-	bool     reload_tima;
-	void     update_timers();
-	void     update_div();
-	void     update_tima();
-
-	void push_current_pc();
 	void handle_interrupts();
+	void setup_interrupt(uint16_t interrupt_pc, uint8_t clear_interrupt);
 	bool IME;
 	bool halted;
 
