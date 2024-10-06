@@ -8,6 +8,7 @@ set(CMAKE_CXX_STADARD_REQUIRED True)
 
 set( SOURCES
 	src/main.cpp
+        src/gameboy.cpp
 	src/cpu/cpu.cpp
 	src/cpu/opcodes.cpp
 	src/cpu/cb_opcodes.cpp

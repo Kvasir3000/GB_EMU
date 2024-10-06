@@ -1,7 +1,12 @@
 #include "cpu.h"
 #include <iostream>
 
-CPU::CPU(BUS* bus) : timers(bus), bus(bus)
+CPU::CPU()
+{
+
+}
+
+CPU::CPU(BUS* bus) : bus(bus)
 {
 	A = { 0x01, "A" };
 	B = { 0xFF, "B" };
@@ -24,18 +29,10 @@ CPU::CPU(BUS* bus) : timers(bus), bus(bus)
     log_file.open("log.txt");
 }
 
-void CPU::start_emulation()
-{
-	while (true)
-	{
-		handle_interrupts();
-		tick();
-		timers.tick(current_instruction.number_of_cycles);
-	}
-}
 
-void CPU::tick()
+uint8_t CPU::tick()
 {
+	handle_interrupts();
 	if (!halted)
 	{
 		fetch_opcode();
@@ -47,6 +44,7 @@ void CPU::tick()
 	{
 		current_instruction.number_of_cycles = 4;
 	}
+	return current_instruction.number_of_cycles;
 }
 
 

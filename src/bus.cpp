@@ -6,6 +6,11 @@
 static char dbg_msg[7000] = { 0 };
 static int msg_size = 0;
 
+BUS::BUS()
+{
+
+}
+
 BUS::BUS(std::vector<uint8_t> program_data)
 {
 	ram = new uint8_t[0xFFFF + 1];

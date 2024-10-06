@@ -19,8 +19,9 @@
 class CPU
 {
 public: 
+	CPU();
 	CPU(BUS* bus);
-	void start_emulation();
+	uint8_t tick();
 
 private:
 
@@ -62,7 +63,6 @@ private:
 	bool     check_jump_condition();
  
 	BUS*       bus;
-	TIMERS     timers;
 
 	struct INSTRUCTION
 	{
@@ -93,7 +93,6 @@ private:
 #endif
 
 	// Fetch-execute
-	void tick();
 	void fetch_opcode();
 	void decode_instruction();
 	void execute();

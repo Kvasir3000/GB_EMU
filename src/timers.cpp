@@ -1,5 +1,10 @@
 #include "timers.h"
 
+TIMERS::TIMERS()
+{
+
+}
+
 TIMERS::TIMERS(BUS* bus)
 {
 	this->bus = bus;

@@ -11,6 +11,7 @@
 class BUS
 {
 public:
+	BUS();
 	BUS(std::vector<uint8_t> program_data);
 	uint8_t  read_memory(uint64_t memory_addr);
 	void     write_memory(uint64_t memory_addr, uint8_t data);

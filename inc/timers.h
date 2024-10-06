@@ -6,6 +6,7 @@
 class TIMERS
 {
 public: 
+	TIMERS();
 	TIMERS(BUS* bus);
 	void tick(uint8_t elapsed_t_cycles);
 

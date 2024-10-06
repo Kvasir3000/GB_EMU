@@ -1381,10 +1381,6 @@ void CPU::jr_cc_n()
 // Push current address onto stack and jump to nn address
 void CPU::call_nn()
 {
-	// Need to verify if incrementing by 3 is required, according to the Zilog spec I should just push
-	// the current content of the PC register, but in case of return, this doesn't make any sense. Maybe
-	// PC increment should be treated differently in such scenario, but right now adding 3 looks to be a 
-	// valid thing. This will become more clear after testing
 	bus->write_memory(--SP, (((PC + 3) & 0xFF00) >> 8));
 	bus->write_memory(--SP, (PC + 3) & 0x00FF);
 	PC = get_memory_address() - 1;
