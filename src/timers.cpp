@@ -2,60 +2,63 @@
 
 TIMERS::TIMERS()
 {
+	system_counter = 0xABCC;
+	tima = 0x00;
+	tma = 0x00;
+	timer_control = 0xF8;
+	last_falling_edge_state = false;
 
 }
 
-TIMERS::TIMERS(BUS* bus)
+bool TIMERS::tick(uint8_t elapsed_t_cycles)
 {
-	this->bus = bus;
-}
-
-void TIMERS::tick(uint8_t elapsed_t_cycles)
-{
+	bool request_timer_interrupt = false;
 	for (int i = 0; i < elapsed_t_cycles; i++)
 	{
 		update_div();
-		update_tima();
+		if (update_tima())
+		{
+			request_timer_interrupt = true;
+		};
 	}
+	return request_timer_interrupt;
 }
 
 void TIMERS::update_div()
 {
-	bus->increment_system_counter();
+	system_counter++;
 }
 
-void TIMERS::update_tima()
+bool TIMERS::update_tima()
 {
-	uint8_t  timer_counter = bus->read_memory(TIMA);
+	uint8_t  timer_counter = tima;
 	bool     falling_edge = false;
-
+	bool     request_timer_interrupt = false;
 	falling_edge = is_falling_edge();
 	if (falling_edge && (timer_counter == 0xFF))
 	{
-		uint8_t interrupt_flag = bus->read_memory(IF);
-		bus->write_memory(IF, interrupt_flag | IF_TIMER_MASK);
-		bus->write_memory(TIMA, bus->read_memory(TMA));
+		request_timer_interrupt = true;
+		tima = tma;
 	}
 	else if (falling_edge)
 	{
-		bus->write_memory(TIMA, ++timer_counter);
+		tima++;
 	}
+	return request_timer_interrupt;
 }
 
 bool TIMERS::is_falling_edge()
 {
-	uint8_t  timer_control = bus->read_memory(TAC);
-	bool     last_falling_edge_state = bus->read_falling_edge_state();
-	bool     tima_tick = false;
+	bool tima_tick = false;
 	tima_tick = is_tima_tick(timer_control);
 	tima_tick &= ((timer_control & TAC_ENABLE_MASK) >> 2);
-	bus->write_falling_edge_state(tima_tick);
-	return last_falling_edge_state == 1 && tima_tick == 0;
+	bool result = last_falling_edge_state == 1 && tima_tick == 0;
+	last_falling_edge_state = tima_tick;
+	return result;
 }
 
 bool TIMERS::is_tima_tick(uint8_t  timer_control)
 {
-	uint16_t system_counter = bus->read_system_counter();
 	bool tima_tick = false;
 
 	if (timer_control & TAC_CLOCK_00_4096_HZ)
@@ -77,3 +80,30 @@ bool TIMERS::is_tima_tick(uint8_t  timer_control)
 
 	return tima_tick;
 }
+
+uint8_t TIMERS::read_div()
+{
+	return (system_counter & 0xF0) >> 8;
+}
+
+uint8_t TIMERS::read_tac()
+{
+	return timer_control;
+}
+
+uint8_t TIMERS::read_tima()
+{
+	return tima;
+}
+
+void TIMERS::reset_div()
+{
+	system_counter = 0;
+}
+
+void TIMERS::write_timer_control(uint8_t tac)
+{
+	last_falling_edge_state &= ((tac & TAC_ENABLE_MASK) >> 2);
+	timer_control = tac;
+}
+

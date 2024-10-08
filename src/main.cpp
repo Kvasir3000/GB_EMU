@@ -2,7 +2,7 @@
 
 int main()
 {
-    GAMEBOY gameboy("../tests/cpu/Blarggs/01-special.gb");
+    GAMEBOY gameboy("../tests/cpu/Blarggs/11-op a,(hl).gb");
     gameboy.run_emulation();
     return 0;
 }

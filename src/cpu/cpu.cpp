@@ -1,5 +1,6 @@
-#include "cpu.h"
 #include <iostream>
+#include "cpu.h"
+
 
 CPU::CPU()
 {

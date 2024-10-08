@@ -10,6 +10,7 @@ set( SOURCES
 	src/main.cpp
         src/gameboy.cpp
 	src/cpu/cpu.cpp
+        src/cartridge.cpp
 	src/cpu/opcodes.cpp
 	src/cpu/cb_opcodes.cpp
         src/cpu/cpu_misc.cpp

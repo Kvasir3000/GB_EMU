@@ -1,0 +1,21 @@
+#define ROM_BANK_00_LOW    0x0000
+#define ROM_BANK_00_HIGH   0x3FFF
+#define ROM_BANK_NN_LOW    0x4000
+#define ROM_BANK_NN_HIGH   0x7FFF
+#define VRAM_LOW           0x8000
+#define VRAM_HIGH          0x9FFF
+#define EXTERNAL_RAM_LOW   0xA000
+#define EXTERNAL_RAM_HIGH  0xBFFF
+#define WRAM_LOW           0xC000
+#define WRAM_HIGH          0xCFFF
+#define EXTERNAL_WRAM_LOW  0xD000
+#define EXTERNAL_WRAM_HIGH 0xDFFF
+#define ECHO_RAM_LOW       0xE000
+#define ECHO_RAM_HIGH      0xFDFF
+#define OAM_LOW            0xFE00
+#define OAM_HIGH           0xFE9F
+#define UNUSED_LOW         0xFEA0
+#define UNUSED_HIGH        0xFEFF
+// Add IO registers
+#define HRAM_LOW           0xFF80
+#define HRAM_HIGH          0xFFFE
