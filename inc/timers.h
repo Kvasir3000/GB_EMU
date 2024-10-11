@@ -14,8 +14,11 @@ public:
 	uint8_t read_div();
 	uint8_t read_tima();
 	uint8_t read_tac();
+	uint8_t read_tma();
 
+	void write_tima(uint8_t tima);
 	void write_timer_control(uint8_t tac);
+	void write_tma(uint8_t tma);
 
 
 private: 

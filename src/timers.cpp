@@ -96,9 +96,19 @@ uint8_t TIMERS::read_tima()
 	return tima;
 }
 
+uint8_t TIMERS::read_tma()
+{
+	return tma;
+}
+
 void TIMERS::reset_div()
 {
 	system_counter = 0;
+}
+
+void TIMERS::write_tima(uint8_t tima)
+{
+	this->tima = tima;
 }
 
 void TIMERS::write_timer_control(uint8_t tac)
@@ -106,4 +116,10 @@ void TIMERS::write_timer_control(uint8_t tac)
 	last_falling_edge_state &= ((tac & TAC_ENABLE_MASK) >> 2);
 	timer_control = tac;
 }
+
+void TIMERS::write_tma(uint8_t tma)
+{
+	this->tma = tma;
+}
+
 

@@ -22,7 +22,6 @@ private:
 	TIMERS     timers;
 	CARTRIDGE* cartridge;
 
-	void read_program(std::vector<uint8_t>& program_data, std::string rom_path);
 	void request_timer_interrupt();
 	bool timer_interrupt_requested;
 };
