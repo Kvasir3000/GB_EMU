@@ -14,8 +14,9 @@ BUS::BUS()
 
 }
 
-BUS::BUS(CARTRIDGE* cartridge, TIMERS* timers)
+BUS::BUS(CARTRIDGE* cartridge, TIMERS* timers, PPU* ppu)
 {
+	this->ppu = ppu;
 	this->cartridge = cartridge;
 	this->timers = timers;
 
@@ -35,7 +36,7 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	}
 	else if (memory_addr >= VRAM_LOW && memory_addr <= VRAM_HIGH)
 	{
-		return vram[memory_addr - VRAM_LOW];
+		return ppu->read_vram(memory_addr - VRAM_LOW);
 	}
 	else if (memory_addr >= EXTERNAL_RAM_LOW && memory_addr <= EXTERNAL_RAM_HIGH)
 	{
@@ -55,7 +56,7 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	}
 	else if (memory_addr >= OAM_LOW && memory_addr <= OAM_HIGH)
 	{
-		return oam[memory_addr - OAM_LOW];
+		return ppu->read_oam(memory_addr - OAM_LOW);
 	}
 	else if (memory_addr >= UNUSED_LOW && memory_addr <= UNUSED_HIGH)
 	{
@@ -136,7 +137,7 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 	}
 	else if (memory_addr >= VRAM_LOW && memory_addr <= VRAM_HIGH)
 	{
-		vram[memory_addr - VRAM_LOW] = data;
+		ppu->write_vram(memory_addr - VRAM_LOW, data);
 	}
 	else if (memory_addr >= EXTERNAL_RAM_LOW && memory_addr <= EXTERNAL_RAM_HIGH)
 	{
@@ -156,13 +157,13 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 	}
 	else if (memory_addr >= OAM_LOW && memory_addr <= OAM_HIGH)
 	{
-		oam[memory_addr - OAM_LOW] = data;
+		ppu->write_oam(memory_addr - OAM_LOW, data);
 	}
 	else if (memory_addr >= UNUSED_LOW && memory_addr <= UNUSED_HIGH)
 	{
 
 	}
-	if (memory_addr == DIV)
+	else if (memory_addr == DIV)
 	{
 		timers->reset_div();
 	}

@@ -309,7 +309,7 @@ void CPU::ld_r1_r2r4()
 
 #if defined DEBUG_CPU
 	log_file << ": " << REG_NAME(one) << " = " << ADDR(memory_address) <<
-		"0x" << (uint16_t)REG_VAL(one) << "\n";
+		        "0x" << (uint16_t)REG_VAL(one) << "\n";
 #endif
 }
 

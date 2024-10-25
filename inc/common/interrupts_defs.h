@@ -1,13 +1,13 @@
 #pragma once 
 
-#define IE                0xFFFF
+//#define IE                0xFFFF
 #define IE_VBLANK_MASK    0x01
 #define IE_LCD_MASK       0x02
 #define IE_TIMER_MASK     0x04
 #define IE_SERIAL_MASK    0x08
 #define IE_JOYPAD_MASK    0x10
 
-#define IF                      0xFF0F
+//#define IF                      0xFF0F
 #define IF_VBLANK_MASK          0x01
 #define IF_LCD_MASK             0x02
 #define IF_TIMER_MASK           0x04

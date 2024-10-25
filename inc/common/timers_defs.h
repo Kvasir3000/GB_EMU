@@ -1,10 +1,10 @@
 #pragma once 
 
-#define DIV                     0xFF04
-#define TIMA                    0xFF05
-#define TMA                     0xFF06
+//#define DIV                     0xFF04
+//#define TIMA                    0xFF05
+//#define TMA                     0xFF06
 
-#define TAC                             0xFF07
+//#define TAC                             0xFF07
 #define TAC_ENABLE_MASK                 0x04
 #define TAC_CLOCK_00_4096_HZ            0x00
 #define TAC_CLOCK_00_SYSTEM_COUNTER_BIT (1 << 9)
