@@ -10,18 +10,18 @@ TIMERS::TIMERS()
 
 }
 
-bool TIMERS::tick(uint8_t elapsed_t_cycles)
+uint8_t TIMERS::tick(uint8_t elapsed_t_cycles)
 {
-	bool request_timer_interrupt = false;
+	uint8_t interrupt = 0;
 	for (int i = 0; i < elapsed_t_cycles; i++)
 	{
 		update_div();
 		if (update_tima())
 		{
-			request_timer_interrupt = true;
+			interrupt = REQUEST_TIMER_INTERRUPT;
 		};
 	}
-	return request_timer_interrupt;
+	return interrupt;
 }
 
 void TIMERS::update_div()
@@ -33,18 +33,18 @@ bool TIMERS::update_tima()
 {
 	uint8_t  timer_counter = tima;
 	bool     falling_edge = false;
-	bool     request_timer_interrupt = false;
+	bool     interrupt = false;
 	falling_edge = is_falling_edge();
 	if (falling_edge && (timer_counter == 0xFF))
 	{
-		request_timer_interrupt = true;
+		interrupt = true;
 		tima = tma;
 	}
 	else if (falling_edge)
 	{
 		tima++;
 	}
-	return request_timer_interrupt;
+	return interrupt;
 }
 
 bool TIMERS::is_falling_edge()

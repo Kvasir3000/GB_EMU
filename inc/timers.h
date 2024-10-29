@@ -3,13 +3,14 @@
 
 #include "timers.h"
 #include "common/timers_defs.h"
+#include "common/interrupts_defs.h"
 
 
 class TIMERS
 {
 public: 
 	TIMERS();
-	bool tick(uint8_t elapsed_t_cycles);
+	uint8_t tick(uint8_t elapsed_t_cycles);
     void reset_div();
 	uint8_t read_div();
 	uint8_t read_tima();

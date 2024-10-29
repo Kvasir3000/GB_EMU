@@ -3,7 +3,7 @@
 
 int main(int argc, char** args)
 {
-    GAMEBOY gameboy("../tests/cpu/Blarggs/11-op a,(hl).gb");
+    GAMEBOY gameboy("../tests/cpu/Blarggs/cpu_instrs.gb"); 
     gameboy.run_emulation();
     return 0;
 }

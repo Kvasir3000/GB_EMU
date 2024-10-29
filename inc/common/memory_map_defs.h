@@ -35,6 +35,10 @@
 #define WAVE_PATTERN_HIGH    0xFF3F
 #define LCD_IO_LOW           0xFF40
 #define LCD_IO_HIGH          0xFF4B
+#define LCD_LCDC             0xFF40
+#define LCD_SCY              0xFF42
+#define LCD_SCX              0xFF43
+#define LCD_LY               0xFF44
 #define DISABLE_BOOT_ROM     0xFF05
 #define IF                   0xFF0F
 #define IE                   0xFFFF

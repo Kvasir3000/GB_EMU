@@ -26,8 +26,9 @@ private:
 	PPU*       ppu;
 	CARTRIDGE* cartridge;
 
+	void request_interrupts();
 	void request_timer_interrupt();
-	bool timer_interrupt_requested;
+	bool interrupts;
 
 	std::chrono::high_resolution_clock::time_point last_frame_time;
 	uint8_t elapsed_t_cycles;

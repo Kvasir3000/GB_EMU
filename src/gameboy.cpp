@@ -9,7 +9,7 @@ GAMEBOY::GAMEBOY(std::string rom_path)
     bus = new BUS(cartridge, &timers, ppu);
     cpu = new CPU(bus);
 
-    timer_interrupt_requested = false;
+    interrupts = false;
 }
 
 void GAMEBOY::init_window()
@@ -42,12 +42,9 @@ void GAMEBOY::run_emulation()
 	while (true)
     {
         elapsed_t_cycles = cpu->tick();
-        timer_interrupt_requested = timers.tick(elapsed_t_cycles);
-        if (timer_interrupt_requested)
-        {
-            request_timer_interrupt();
-        }
-        ppu->tick(elapsed_t_cycles);
+        interrupts |= timers.tick(elapsed_t_cycles);
+        interrupts |= ppu->tick(elapsed_t_cycles);
+        request_interrupts();
         auto elaplsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - last_frame_time);
         if (elaplsed_time.count() >= 16)
         {
@@ -58,10 +55,20 @@ void GAMEBOY::run_emulation()
 	}
 }
 
+
+void GAMEBOY::request_interrupts()
+{
+    if (interrupts & REQUEST_TIMER_INTERRUPT)
+    {
+        request_timer_interrupt();
+    }
+    interrupts = 0;
+}
+
 void GAMEBOY::request_timer_interrupt()
 {
     uint8_t interrupt_flag = bus->read_memory(IF);
     bus->write_memory(IF, interrupt_flag | IF_TIMER_MASK);
     bus->write_memory(TIMA, bus->read_memory(TMA)); 
-    timer_interrupt_requested = false;
+    interrupts = false;
 }

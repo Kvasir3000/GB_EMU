@@ -102,9 +102,25 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	{
 		return 0xEF;
 	}
-	else if (memory_addr >= LCD_IO_LOW && memory_addr <= LCD_IO_HIGH)
+	//else if (memory_addr >= LCD_IO_LOW && memory_addr <= LCD_IO_HIGH)
+	//{
+	//	return 0xDE; // delete this
+	//}
+	else if (memory_addr == LCD_LCDC)
 	{
-		return 0xDE;
+		return ppu->read_lcdc();
+	}
+	else if (memory_addr == LCD_SCY)
+	{
+		return ppu->read_scy();
+	}
+	else if (memory_addr == LCD_SCX)
+	{
+		return ppu->read_scx();
+	}
+	else if (memory_addr == LCD_LY)
+	{
+		return ppu->read_ly();
 	}
 	else if (memory_addr == DISABLE_BOOT_ROM)
 	{
@@ -120,7 +136,7 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	}
 	else
 	{
-		assert(false);
+		//assert(false);
 		return 0xF0;
 	}
 };
@@ -215,9 +231,21 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 	{
 
 	}
-	else if (memory_addr >= LCD_IO_LOW && memory_addr <= LCD_IO_HIGH)
+	//else if (memory_addr >= LCD_IO_LOW && memory_addr <= LCD_IO_HIGH)
+	//{
+	//	// delete this
+	//}
+	else if (memory_addr == LCD_LCDC)
 	{
-
+		ppu->write_lcdc(data);
+	}
+	else if (memory_addr == LCD_SCY)
+	{
+		ppu->write_scy(data);
+	}
+	else if (memory_addr == LCD_SCX)
+	{
+		ppu->write_scx(data);
 	}
 	else if (memory_addr == DISABLE_BOOT_ROM)
 	{
