@@ -2,10 +2,18 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <iostream>
+#include <SDL.h>
+#include <assert.h>
+#include <chrono>
+#include <thread>
 
 #include "common/ppu_defs.h"
+#include "utils/debug.h"
 #include "common/memory_map_defs.h"
 #include "common/interrupts_defs.h"
+
+#define DEBUG_PPU
 
 
 class PPU
@@ -43,21 +51,39 @@ private:
 	uint8_t    vram[VRAM_HIGH - VRAM_LOW + 1];
 	uint8_t    oam[OAM_HIGH - OAM_LOW + 1];
 
-	struct PALLET
-	{
-		uint8_t data;
-	};
-	PALLET frame_buffer[LCD_RESOLUTION_Y][LCD_RESOLUTION_X];
+	uint8_t frame_buffer[LCD_RESOLUTION_Y][LCD_RESOLUTION_X];
 
 	struct TILE
 	{
-		uint8_t raw_data[16];
+		uint8_t  raw_data[TILE_SIZE];
+		uint16_t decoded_data[TILE_DIMENSION];
 	};
-	uint8_t tile_map_cache[TILE_MAP_DIMENSION];
-	TILE    tile_cache[TILE_MAP_DIMENSION];
+	uint8_t   tile_map_cache[TILE_MAP_DIMENSION];
+	TILE      tile_cache[TILE_MAP_DIMENSION];
+	TILE      sample_tile(uint16_t memory_address);
+	void      decode_tile(TILE& tile);
+	void      render_tile(SDL_Renderer* renderer, uint16_t x, uint16_t y, uint16_t scaler, TILE tile);
+	SDL_Color get_pallet_color(uint8_t pallet_id);
 
+	std::chrono::microseconds frame_duration;
+	std::chrono::high_resolution_clock::time_point last_frame_time;
 	void render_frame();
 	void scnaline_background();
 	void fetch_tile_map_line(uint8_t y_tile_map);
-	void fetch_tile_line(uint8_t y_offset);
+	void fetch_tile_line();
+	
+	void           init_window();
+	SDL_Window*    window;
+	SDL_Renderer*  renderer;
+	void           render_frame_buffer();
+
+	// PPU debug
+	SDL_Window*   vram_window;
+	SDL_Renderer* vram_renderer;
+	SDL_Window*   tile_map_window; 
+	SDL_Renderer* tile_map_renderer;
+	void          init_debug_windows();
+	void          render_vram_debug();
+	void          render_tile_map_debug();
+	void          render_viewport_debug();
 };

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include <SDL.h>
+#include <thread>
 
 #include "bus.h"
 #include "timers.h"
@@ -23,17 +24,16 @@ private:
 	BUS*       bus;
 	CPU*       cpu;
 	TIMERS     timers;
-	PPU*       ppu;
+    PPU*       ppu;
 	CARTRIDGE* cartridge;
 
+	
 	void request_interrupts();
 	void request_timer_interrupt();
-	bool interrupts;
+	void request_vblank_interrupt();
+	uint8_t interrupts;
 
-	std::chrono::high_resolution_clock::time_point last_frame_time;
 	uint8_t elapsed_t_cycles;
 
-	void init_window();
-	SDL_Window* window;
-	SDL_Surface* window_surface;
+	void read_input();
 };

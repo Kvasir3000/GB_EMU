@@ -80,6 +80,7 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	}
 	else if (memory_addr == JOYPAD_INPUT)
 	{
+		int a = 23;
 		return 0xDE;
 	}
 	else if (memory_addr == SB) 

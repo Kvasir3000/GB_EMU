@@ -16,7 +16,8 @@ set( SOURCES
 	src/cpu/opcodes.cpp
 	src/cpu/cb_opcodes.cpp
         src/cpu/cpu_misc.cpp
-        src/ppu.cpp
+        src/ppu/ppu.cpp
+        src/ppu/ppu_debug.cpp
 	src/bus.cpp
 	src/timers.cpp
 	src/utils/utils.cpp

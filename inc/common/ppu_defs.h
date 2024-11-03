@@ -2,11 +2,13 @@
 
 #define LCD_RESOLUTION_X               166
 #define LCD_RESOLUTION_Y               144 
-#define LCD_RESOLUTION_SCALER          3
+#define LCD_RESOLUTION_SCALER          4
 
 #define TILE_DIMENSION                 8
 #define TILE_MAP_DIMENSION             32
 #define TILE_MAP_PIXEL_DIMENSION       TILE_DIMENSION * TILE_MAP_DIMENSION
+
+#define TILE_SIZE                      16
 
 #define MODE_0_HORIZONTAL_BLANK_DOTS   204
 #define MODE_2_OAM_SCAN_DOTS           80
@@ -32,3 +34,5 @@
 #define BG_TILE_MAP_BASE_1             0x9C00
 #define TILE_DATA_BASE_0               0x9000
 #define TILE_DATA_BASE_1               0x8000
+
+#define PIXEL_MASK                     0b11

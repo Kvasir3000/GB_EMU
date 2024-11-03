@@ -1,3 +1,5 @@
+#pragma once 
+
 #define F_REG_BITS                 ": F.Z = " << (uint16_t)F.Z << " F.N = " << (uint16_t)F.N << " F.H = " \
                                    << (uint16_t)F.H << " F.C = " << (uint16_t)F.C
 
@@ -22,4 +24,16 @@
 
 #define LOG_JUMP                 ": 0x" << PC + 1 << "\n"     
 #define LOG_CONDITIONAL_JUMP	 F_REG_BITS; if (jump)  {   log_file << LOG_JUMP; } else { log_file << ": Jump is ignored\n"; }
+
+
+
+#define PPU_DEBUG_VRAM_RESOLUTION_X     128
+#define PPU_DEBUG_VRAM_RESOLUTION_Y     192
+#define PPU_DEBUG_VRAM_GRID_X           16
+#define PPU_DEBUG_VRAM_GRID_Y           16
+#define PPU_DEBUG_SCALER                2
+#define PPU_DEBUG_TILE_MAP_RESOLUTION_X 255 
+#define PPU_DEBUG_TILE_MAP_RESOLUTION_Y 510
+#define PPU_DEBUG_TILE_MAP_GRID_X       32
+#define PPU_DEBUG_TILE_MAP_GRID_Y       32
 
