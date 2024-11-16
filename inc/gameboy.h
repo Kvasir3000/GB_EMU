@@ -11,6 +11,7 @@
 #include "timers.h"
 #include "cpu.h"
 #include "ppu.h"
+#include "joypad.h"
 #include "cartridge.h"
 
 
@@ -25,6 +26,7 @@ private:
 	CPU*       cpu;
 	TIMERS     timers;
     PPU*       ppu;
+	JOYPAD     joypad;
 	CARTRIDGE* cartridge;
 
 	
@@ -34,6 +36,4 @@ private:
 	uint8_t interrupts;
 
 	uint8_t elapsed_t_cycles;
-
-	void read_input();
 };

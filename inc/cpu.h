@@ -14,7 +14,7 @@
 #include "cb_opcodes.h"
 #include "timers.h"
 
-//#undef DEBUG_CPU
+#undef DEBUG_CPU
 
 
 class CPU

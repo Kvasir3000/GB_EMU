@@ -39,6 +39,7 @@
 #define LCD_SCY              0xFF42
 #define LCD_SCX              0xFF43
 #define LCD_LY               0xFF44
+#define OAM_DMA              0xFF46
 #define DISABLE_BOOT_ROM     0xFF05
 #define IF                   0xFF0F
 #define IE                   0xFFFF

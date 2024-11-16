@@ -19,6 +19,7 @@ set( SOURCES
         src/ppu/ppu.cpp
         src/ppu/ppu_debug.cpp
 	src/bus.cpp
+	src/joypad.cpp
 	src/timers.cpp
 	src/utils/utils.cpp
 )

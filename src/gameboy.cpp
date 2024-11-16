@@ -2,10 +2,11 @@
 
 GAMEBOY::GAMEBOY(std::string rom_path)
 {
+    joypad = JOYPAD();
     cartridge = new CARTRIDGE(rom_path);
     timers = TIMERS();
     ppu = new PPU();
-    bus = new BUS(cartridge, &timers, ppu);
+    bus = new BUS(cartridge, &timers, ppu, &joypad);
     cpu = new CPU(bus);
 
     interrupts = false;
@@ -19,7 +20,7 @@ void GAMEBOY::run_emulation()
         interrupts |= timers.tick(elapsed_t_cycles);
         interrupts |= ppu->tick(elapsed_t_cycles);
         request_interrupts();
-        read_input();
+        joypad.read_input();
     }
 }
 
@@ -47,16 +48,4 @@ void GAMEBOY::request_vblank_interrupt()
 {
     uint8_t interrupt_flag = bus->read_memory(IF);
     bus->write_memory(IF, interrupt_flag | IF_VBLANK_MASK);
-}
-
-void GAMEBOY::read_input()
-{
-    SDL_Event events;
-    while (SDL_PollEvent(&events))
-    {
-        if (events.type == SDL_QUIT)
-        {
-           
-        }
-    }
 }

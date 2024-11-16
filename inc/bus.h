@@ -2,9 +2,13 @@
 
 #include <stdint.h>
 #include <vector>
+#include <iostream>
+
 #include "common/timers_defs.h"
 #include "common/interrupts_defs.h"
+#include "common/memory_map_defs.h"
 #include "cartridge.h"
+#include "joypad.h"
 #include "timers.h"
 #include "ppu.h"
 
@@ -13,7 +17,7 @@ class BUS
 {
 public:
 	BUS();
-	BUS(CARTRIDGE* cartridge, TIMERS* timers, PPU* ppu);
+	BUS(CARTRIDGE* cartridge, TIMERS* timers, PPU* ppu, JOYPAD* joypad);
 	uint8_t  read_memory(uint64_t memory_addr);
 	void     write_memory(uint64_t memory_addr, uint8_t data);
 
@@ -29,7 +33,12 @@ private:
 	uint8_t    interrupt_enable;
 	uint8_t    interrupt_flag;
 	uint8_t    disable_boot_rom_flag;
+	JOYPAD*    joypad;
 	PPU*       ppu;
 	CARTRIDGE* cartridge;
 	TIMERS*    timers;
+
+
+	char dbg_msg[7000] = { 0 };
+	int msg_size = 0;
 };

@@ -3,7 +3,7 @@
 #if defined DEBUG_PPU
 void PPU::init_debug_windows()
 {
-	vram_window = SDL_CreateWindow("VRAM", 500, 250, PPU_DEBUG_VRAM_RESOLUTION_X * LCD_RESOLUTION_SCALER,
+	vram_window = SDL_CreateWindow("VRAM", 250 + LCD_RESOLUTION_X * LCD_RESOLUTION_SCALER, 100, PPU_DEBUG_VRAM_RESOLUTION_X * LCD_RESOLUTION_SCALER,
 		                           PPU_DEBUG_VRAM_RESOLUTION_Y * LCD_RESOLUTION_SCALER, SDL_WINDOW_SHOWN);
 	if (vram_window < 0)
 	{
@@ -18,7 +18,8 @@ void PPU::init_debug_windows()
 		assert(false);
 	}
 
-	tile_map_window = SDL_CreateWindow("TILE MAP", 700, 250, PPU_DEBUG_TILE_MAP_RESOLUTION_X * PPU_DEBUG_SCALER,
+	tile_map_window = SDL_CreateWindow("TILE MAP", 250 + LCD_RESOLUTION_X * LCD_RESOLUTION_SCALER + PPU_DEBUG_VRAM_RESOLUTION_X * LCD_RESOLUTION_SCALER,
+		                               100, PPU_DEBUG_TILE_MAP_RESOLUTION_X * PPU_DEBUG_SCALER,
 		                               PPU_DEBUG_TILE_MAP_RESOLUTION_Y * PPU_DEBUG_SCALER, SDL_WINDOW_SHOWN);
 	if (tile_map_window < 0)
 	{
@@ -119,7 +120,7 @@ void PPU::render_viewport_debug()
 	{
 		SDL_RenderDrawLine(tile_map_renderer, viewport_x1 * PPU_DEBUG_SCALER, viewport_y1 * PPU_DEBUG_SCALER, viewport_x1                                                     * PPU_DEBUG_SCALER, (viewport_y1 + (PPU_DEBUG_TILE_MAP_RESOLUTION_Y / 2 - viewport_y1)) * PPU_DEBUG_SCALER);
 		SDL_RenderDrawLine(tile_map_renderer, viewport_x2 * PPU_DEBUG_SCALER, 0           * PPU_DEBUG_SCALER, viewport_x2                                                     * PPU_DEBUG_SCALER, viewport_y2                                                         * PPU_DEBUG_SCALER);
-		SDL_RenderDrawLine(tile_map_renderer, viewport_x1 * PPU_DEBUG_SCALER, 0           * PPU_DEBUG_SCALER, viewport_x1                                                     * PPU_DEBUG_SCALER, viewport_y2 * PPU_DEBUG_SCALER);
+		SDL_RenderDrawLine(tile_map_renderer, viewport_x1 * PPU_DEBUG_SCALER, 0           * PPU_DEBUG_SCALER, viewport_x1                                                     * PPU_DEBUG_SCALER, viewport_y2                                                         * PPU_DEBUG_SCALER);
 		SDL_RenderDrawLine(tile_map_renderer, viewport_x2 * PPU_DEBUG_SCALER, viewport_y1 * PPU_DEBUG_SCALER, viewport_x2                                                     * PPU_DEBUG_SCALER, (viewport_y1 + (PPU_DEBUG_TILE_MAP_RESOLUTION_Y / 2 - viewport_y1)) * PPU_DEBUG_SCALER);
 		SDL_RenderDrawLine(tile_map_renderer, viewport_x1 * PPU_DEBUG_SCALER, viewport_y1 * PPU_DEBUG_SCALER, (viewport_x1 + (PPU_DEBUG_TILE_MAP_RESOLUTION_X - viewport_x1)) * PPU_DEBUG_SCALER, viewport_y1                                                         * PPU_DEBUG_SCALER);
 		SDL_RenderDrawLine(tile_map_renderer, 0           * PPU_DEBUG_SCALER, viewport_y2 * PPU_DEBUG_SCALER, viewport_x2                                                     * PPU_DEBUG_SCALER, viewport_y2                                                         * PPU_DEBUG_SCALER);

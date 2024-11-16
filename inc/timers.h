@@ -1,7 +1,6 @@
 #pragma once 
 #include <stdint.h>
 
-#include "timers.h"
 #include "common/timers_defs.h"
 #include "common/interrupts_defs.h"
 

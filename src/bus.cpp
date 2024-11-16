@@ -1,27 +1,24 @@
-#include <iostream>
-
 #include "bus.h"
-#include "opcodes.h"
-#include "cb_opcodes.h"
-#include "common/memory_map_defs.h"
-
-
-static char dbg_msg[7000] = { 0 };
-static int msg_size = 0;
 
 BUS::BUS()
 {
 
 }
 
-BUS::BUS(CARTRIDGE* cartridge, TIMERS* timers, PPU* ppu)
+BUS::BUS(CARTRIDGE* cartridge, TIMERS* timers, PPU* ppu, JOYPAD* joypad)
 {
 	this->ppu = ppu;
 	this->cartridge = cartridge;
 	this->timers = timers;
+	this->joypad = joypad;
 
 	interrupt_flag = 0xE1;
 	interrupt_enable = 0x00;
+
+	size_t size = WRAM_HIGH_BANK_0 - WRAM_LOW_BANK_0 + 1;
+	memset(wram, 0, size);
+	size = HRAM_HIGH - HRAM_LOW + 1;
+	memset(hram, 0, size);
 }
 
 uint8_t BUS::read_memory(uint64_t memory_addr)
@@ -80,8 +77,7 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	}
 	else if (memory_addr == JOYPAD_INPUT)
 	{
-		int a = 23;
-		return 0xDE;
+		return joypad->read_p1();
 	}
 	else if (memory_addr == SB) 
 	{
@@ -198,7 +194,7 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 	}
 	else if (memory_addr == JOYPAD_INPUT)
 	{
-
+		joypad->write_p1(data);
 	}
 	else if (memory_addr == SB)
 	{
@@ -247,6 +243,15 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 	else if (memory_addr == LCD_SCX)
 	{
 		ppu->write_scx(data);
+	}
+	else if (memory_addr == OAM_DMA)
+	{
+		uint16_t src_address = data << 8;
+		for (uint16_t i = 0; i <= OAM_HIGH - OAM_LOW; i++)
+		{
+			uint8_t byte = read_memory(i + src_address);
+			ppu->write_oam(i, byte);
+		}
 	}
 	else if (memory_addr == DISABLE_BOOT_ROM)
 	{

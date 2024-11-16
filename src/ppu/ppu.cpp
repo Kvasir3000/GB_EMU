@@ -8,7 +8,7 @@ PPU::PPU()
 	memset(vram, 0, VRAM_HIGH - VRAM_LOW + 1);
 	init_window();
 	last_frame_time = std::chrono::high_resolution_clock::now();
-	frame_duration = std::chrono::microseconds(16);
+	frame_duration = std::chrono::milliseconds(16);
 
 #if defined DEBUG_PPU
 	init_debug_windows();
@@ -24,7 +24,7 @@ void PPU::init_window()
 		assert(false);
 	}
 
-	window = SDL_CreateWindow("Game Boy", 250, 250, LCD_RESOLUTION_X * LCD_RESOLUTION_SCALER, LCD_RESOLUTION_Y * LCD_RESOLUTION_SCALER, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("Game Boy", 250, 100, LCD_RESOLUTION_X * LCD_RESOLUTION_SCALER, LCD_RESOLUTION_Y * LCD_RESOLUTION_SCALER, SDL_WINDOW_SHOWN);
 	if (!window)
 	{
 		std::cout << "SDL_CreateWindow failed: " << SDL_GetError() << "\n";
@@ -81,6 +81,7 @@ uint8_t PPU::tick(uint8_t elapsed_dots)
 			scanline_dots = 0;
 			if (current_line == END_OF_FRAME_SCANLINE)
 			{
+				draw_objects();
 				render_frame();
 				current_mode = MODE_2_OAM_SCAN;
 				current_line = 0;
@@ -137,7 +138,10 @@ void PPU::fetch_tile_line()
 		}
 		else
 		{
-			tile_address = TILE_DATA_BASE_0 - ((int8_t)tile_map_cache[i] * TILE_SIZE);
+			uint8_t t = 0x39;
+			int8_t t1 = 0x39;
+			int8_t offset = (int8_t)tile_map_cache[i];
+			tile_address = TILE_DATA_BASE_0 - (offset * TILE_SIZE);
 		}
 
 		TILE tile = sample_tile(tile_address);
@@ -198,7 +202,7 @@ void PPU::render_frame()
 		std::this_thread::sleep_for(frame_duration - elaplsed_time);
 	}
 	render_frame_buffer();
-
+	
 #if defined DEBUG_PPU
 	render_vram_debug();
 	render_tile_map_debug();
@@ -244,6 +248,60 @@ SDL_Color PPU::get_pallet_color(uint8_t pallet_id)
 		color = { 0, 0, 0, 255 };
 	}
 	return color;
+}
+
+PPU::OBJECT_ATTRIBUTES PPU::sample_object(uint16_t memory_address)
+{
+	OBJECT_ATTRIBUTES object = { 0 };
+	object.y = oam[memory_address++];
+	object.x = oam[memory_address++];
+	object.tile_id = oam[memory_address++];
+	object.attributes = oam[memory_address++];
+
+	return object;
+}
+
+void PPU::select_objects()
+{
+	selected_objects.clear();
+	for (uint16_t i = 0; i <= OAM_HIGH - OAM_LOW; i += 4)
+	{
+		OBJECT_ATTRIBUTES object = sample_object(i);
+		int16_t object_y = object.y - 16;
+		if (object_y >= 0 && object_y <= LCD_RESOLUTION_Y)
+		{
+			selected_objects.push_back(object);
+		}
+	}
+}
+
+void PPU::draw_objects()
+{
+	select_objects();
+	for (uint16_t i = 0; i < selected_objects.size(); i++)
+	{
+		OBJECT_ATTRIBUTES object = selected_objects[i];
+		uint16_t tile_addres = TILE_DATA_BASE_1 + (object.tile_id * TILE_SIZE);
+		TILE tile = sample_tile(tile_addres);
+		decode_tile(tile);
+		for (uint8_t j = 0; j < TILE_DIMENSION; j++)
+		{
+			for (uint8_t k = 0; k < TILE_DIMENSION; k++)
+			{
+				int16_t x = object.x - 8 + k;
+				int16_t y = object.y - 16 + j;
+				if (x >= 0 && x <= LCD_RESOLUTION_X && y >= 0 && y <= LCD_RESOLUTION_Y)
+				{
+					uint16_t line = tile.decoded_data[j];
+					uint8_t  shift = (14 - (k * 2));
+					uint16_t mask = PIXEL_MASK << shift;
+					uint16_t temp1 = line & mask;
+					uint8_t  temp2 = temp1 >> shift;
+					frame_buffer[y][x] = (tile.decoded_data[j] & (PIXEL_MASK << (14 - (k * 2)))) >> (14 - (k * 2));
+				}
+			}
+		}
+	}
 }
 
 uint8_t PPU::read_oam(uint16_t memory_address)

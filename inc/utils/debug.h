@@ -1,5 +1,8 @@
 #pragma once 
 
+
+#define BREAK_PC(pc)  if (PC == pc) {__debugbreak();};
+
 #define F_REG_BITS                 ": F.Z = " << (uint16_t)F.Z << " F.N = " << (uint16_t)F.N << " F.H = " \
                                    << (uint16_t)F.H << " F.C = " << (uint16_t)F.C
 
