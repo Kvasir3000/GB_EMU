@@ -14,7 +14,6 @@ public:
 	CARTRIDGE(std::string rom_path);
 	CARTRIDGE(std::string rom_path, std::vector<uint8_t> program_data);
 	uint8_t read_rom(uint16_t memory_address);
-	void    write_rom(uint16_t memory_address, uint8_t data);
 	uint8_t read_ram(uint16_t memory_address);
 	void    write_ram(uint16_t memory_address, uint8_t data);
 

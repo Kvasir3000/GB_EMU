@@ -83,7 +83,7 @@ bool TIMERS::is_tima_tick(uint8_t  timer_control)
 
 uint8_t TIMERS::read_div()
 {
-	return (system_counter & 0xF0) >> 8;
+	return (system_counter & 0xFF00) >> 8;
 }
 
 uint8_t TIMERS::read_tac()

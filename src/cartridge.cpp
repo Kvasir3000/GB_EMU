@@ -17,9 +17,7 @@ CARTRIDGE::CARTRIDGE(std::string rom_path)
 
 CARTRIDGE::CARTRIDGE(std::string rom_path, std::vector<uint8_t> program_data)
 {
-    //this->program_data = new uint8_t[0xFFFF + 1];
     read_program(rom_path);
-    //memcpy(this->program_data, program_data.data(), program_data.size() * sizeof(uint8_t));
     ram_bank_idx = 0;
     rom_bank_idx = 0; 
     std::vector<uint8_t>ram_bank1(0x2000);
@@ -37,15 +35,6 @@ uint8_t CARTRIDGE::read_rom(uint16_t memory_address)
 
     }*/
     return program_data[memory_address];
-}
-
-void CARTRIDGE::write_rom(uint16_t memory_address, uint8_t data)
-{
- /*   if (memory_address >= ROM_BANK_00_LOW && memory_address <= ROM_BANK_00_HIGH)
-    {
-
-    }*/
-    program_data[memory_address] = data;
 }
 
 uint8_t CARTRIDGE::read_ram(uint16_t memory_address)

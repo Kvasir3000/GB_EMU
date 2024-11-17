@@ -142,11 +142,11 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 {
 	if (memory_addr >= ROM_BANK_00_LOW && memory_addr <= ROM_BANK_00_HIGH)
 	{
-		cartridge->write_rom(memory_addr, data);
+		std::cout << "Warning: write to ROM address is disabled 0x" << std::hex << memory_addr;
 	}
 	else if (memory_addr >= ROM_BANK_NN_LOW && memory_addr <= ROM_BANK_NN_HIGH)
 	{
-		cartridge->write_rom(memory_addr, data);
+		std::cout << "Warning: write to ROM address is disabled 0x" << std::hex << memory_addr;
 	}
 	else if (memory_addr >= VRAM_LOW && memory_addr <= VRAM_HIGH)
 	{
