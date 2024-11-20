@@ -36,10 +36,17 @@
 #define LCD_IO_LOW           0xFF40
 #define LCD_IO_HIGH          0xFF4B
 #define LCD_LCDC             0xFF40
+#define LCD_STAT             0xFF41
 #define LCD_SCY              0xFF42
 #define LCD_SCX              0xFF43
 #define LCD_LY               0xFF44
+#define LCD_LYC              0xFF45
 #define OAM_DMA              0xFF46
+#define LCD_BGP              0xFF47
+#define LCD_OBP0             0xFF48
+#define LCD_OBP1             0xFF49
+#define LCD_WY               0xFF4A
+#define LCD_WX               0xFF4B
 #define DISABLE_BOOT_ROM     0xFF05
 #define IF                   0xFF0F
 #define IE                   0xFFFF

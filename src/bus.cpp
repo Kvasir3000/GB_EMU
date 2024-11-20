@@ -21,81 +21,83 @@ BUS::BUS(CARTRIDGE* cartridge, TIMERS* timers, PPU* ppu, JOYPAD* joypad)
 	memset(hram, 0, size);
 }
 
-uint8_t BUS::read_memory(uint64_t memory_addr)
+uint8_t BUS::read_memory(uint64_t memory_address)
 {
-	if (memory_addr >= ROM_BANK_00_LOW && memory_addr <= ROM_BANK_00_HIGH)
+	if (memory_address >= ROM_BANK_00_LOW && memory_address <= ROM_BANK_00_HIGH)
 	{
-		return cartridge->read_rom(memory_addr);
+		//return cartridge->read_rom(memory_addr);
+		return cartridge->read_rom_bank0(memory_address);
 	}
-	else if (memory_addr >= ROM_BANK_NN_LOW && memory_addr <= ROM_BANK_NN_HIGH)
+	else if (memory_address >= ROM_BANK_NN_LOW && memory_address <= ROM_BANK_NN_HIGH)
 	{
-		return cartridge->read_rom(memory_addr);
+		//return cartridge->read_rom(memory_addr);
+		return cartridge->read_rom_bank_nn(memory_address - ROM_BANK_NN_LOW);
 	}
-	else if (memory_addr >= VRAM_LOW && memory_addr <= VRAM_HIGH)
+	else if (memory_address >= VRAM_LOW && memory_address <= VRAM_HIGH)
 	{
-		return ppu->read_vram(memory_addr - VRAM_LOW);
+		return ppu->read_vram(memory_address - VRAM_LOW);
 	}
-	else if (memory_addr >= EXTERNAL_RAM_LOW && memory_addr <= EXTERNAL_RAM_HIGH)
+	else if (memory_address >= EXTERNAL_RAM_LOW && memory_address <= EXTERNAL_RAM_HIGH)
 	{
-		return cartridge->read_ram(memory_addr);
+		return cartridge->read_ram(memory_address - EXTERNAL_RAM_LOW);
 	}
-	else if (memory_addr >= WRAM_LOW_BANK_0 && memory_addr <= WRAM_HIGH_BANK_0)
+	else if (memory_address >= WRAM_LOW_BANK_0 && memory_address <= WRAM_HIGH_BANK_0)
 	{
-		return wram[memory_addr - WRAM_LOW_BANK_0];
+		return wram[memory_address - WRAM_LOW_BANK_0];
 	}
-	else if (memory_addr >= WRAM_LOW_BANK_1 && memory_addr <= WRAM_HIGH_BANK_1)
+	else if (memory_address >= WRAM_LOW_BANK_1 && memory_address <= WRAM_HIGH_BANK_1)
 	{ 
-		return wram[memory_addr - WRAM_LOW_BANK_0];
+		return wram[memory_address - WRAM_LOW_BANK_0];
 	}
-	else if (memory_addr >= ECHO_RAM_LOW && memory_addr <= ECHO_RAM_HIGH)
+	else if (memory_address >= ECHO_RAM_LOW && memory_address <= ECHO_RAM_HIGH)
 	{
-		return wram[memory_addr - WRAM_LOW_BANK_0 - ECHO_RAM_LOW];
+		return wram[memory_address - WRAM_LOW_BANK_0 - ECHO_RAM_LOW];
 	}
-	else if (memory_addr >= OAM_LOW && memory_addr <= OAM_HIGH)
+	else if (memory_address >= OAM_LOW && memory_address <= OAM_HIGH)
 	{
-		return ppu->read_oam(memory_addr - OAM_LOW);
+		return ppu->read_oam(memory_address - OAM_LOW);
 	}
-	else if (memory_addr >= UNUSED_LOW && memory_addr <= UNUSED_HIGH)
+	else if (memory_address >= UNUSED_LOW && memory_address <= UNUSED_HIGH)
 	{
 		return 0xFF;
 	}
-	else if (memory_addr == DIV)
+	else if (memory_address == DIV)
 	{
 		return timers->read_div();
 	}
-	else if (memory_addr == TIMA)
+	else if (memory_address == TIMA)
 	{
 		return timers->read_tima();
 	}
-	else if (memory_addr == TAC)
+	else if (memory_address == TAC)
 	{
 		return timers->read_tac();
 	}
-	else if (memory_addr == TMA)
+	else if (memory_address == TMA)
 	{
 		return timers->read_tma();
 	}
-	else if (memory_addr == JOYPAD_INPUT)
+	else if (memory_address == JOYPAD_INPUT)
 	{
 		return joypad->read_p1();
 	}
-	else if (memory_addr == SB) 
+	else if (memory_address == SB) 
 	{
 		return serial_transfer_data;
 	}
-	else if (memory_addr == SC)
+	else if (memory_address == SC)
 	{
 		return serial_transfer_control;
 	}
-	else if (memory_addr == IF)
+	else if (memory_address == IF)
 	{
 		return interrupt_flag;
 	}
-	else if (memory_addr >= AUDIO_IO_LOW && memory_addr <= AUDIO_IO_HIGH)
+	else if (memory_address >= AUDIO_IO_LOW && memory_address <= AUDIO_IO_HIGH)
 	{
 		return 0xBE;
 	}
-	else if (memory_addr >= WAVE_PATTERN_LOW && memory_addr <= WAVE_PATTERN_HIGH)
+	else if (memory_address >= WAVE_PATTERN_LOW && memory_address <= WAVE_PATTERN_HIGH)
 	{
 		return 0xEF;
 	}
@@ -103,31 +105,59 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	//{
 	//	return 0xDE; // delete this
 	//}
-	else if (memory_addr == LCD_LCDC)
+	else if (memory_address == LCD_LCDC)
 	{
 		return ppu->read_lcdc();
 	}
-	else if (memory_addr == LCD_SCY)
+	else if (memory_address == LCD_STAT)
+	{
+		//return ppu->read_stat();
+	}
+	else if (memory_address == LCD_SCY)
 	{
 		return ppu->read_scy();
 	}
-	else if (memory_addr == LCD_SCX)
+	else if (memory_address == LCD_SCX)
 	{
 		return ppu->read_scx();
 	}
-	else if (memory_addr == LCD_LY)
+	else if (memory_address == LCD_LY)
 	{
 		return ppu->read_ly();
 	}
-	else if (memory_addr == DISABLE_BOOT_ROM)
+	else if (memory_address == LCD_LYC)
+	{
+		return ppu->read_lyc();
+	}
+	else if (memory_address == LCD_BGP)
+	{
+		return ppu->read_bgp();
+	}
+	else if (memory_address == LCD_OBP0)
+	{
+		return ppu->read_obp0();
+	}
+	else if (memory_address == LCD_OBP1)
+	{
+		return ppu->read_obp1();
+	}
+	else if (memory_address == LCD_WY)
+	{
+		return ppu->read_wy();
+	}
+	else if (memory_address == LCD_WX)
+	{
+		return ppu->read_wx();
+	}
+	else if (memory_address == DISABLE_BOOT_ROM)
 	{
 		return disable_boot_rom_flag;
 	}
-	else if (memory_addr >= HRAM_LOW && memory_addr <= HRAM_HIGH)
+	else if (memory_address >= HRAM_LOW && memory_address <= HRAM_HIGH)
 	{
-		return hram[memory_addr - HRAM_LOW];
+		return hram[memory_address - HRAM_LOW];
 	}
-	else if (memory_addr == IE)
+	else if (memory_address == IE)
 	{
 		return interrupt_enable;
 	}
@@ -138,69 +168,69 @@ uint8_t BUS::read_memory(uint64_t memory_addr)
 	}
 };
 
-void BUS::write_memory(uint64_t memory_addr, uint8_t data)
+void BUS::write_memory(uint64_t memory_address, uint8_t data)
 {
-	if (memory_addr >= ROM_BANK_00_LOW && memory_addr <= ROM_BANK_00_HIGH)
+	if (memory_address >= ROM_BANK_00_LOW && memory_address <= ROM_BANK_00_HIGH)
 	{
-		std::cout << "Warning: write to ROM address is disabled 0x" << std::hex << memory_addr;
+		cartridge->write_rom(memory_address, data);
 	}
-	else if (memory_addr >= ROM_BANK_NN_LOW && memory_addr <= ROM_BANK_NN_HIGH)
+	else if (memory_address >= ROM_BANK_NN_LOW && memory_address <= ROM_BANK_NN_HIGH)
 	{
-		std::cout << "Warning: write to ROM address is disabled 0x" << std::hex << memory_addr;
+		cartridge->write_rom(memory_address, data);
 	}
-	else if (memory_addr >= VRAM_LOW && memory_addr <= VRAM_HIGH)
+	else if (memory_address >= VRAM_LOW && memory_address <= VRAM_HIGH)
 	{
-		ppu->write_vram(memory_addr - VRAM_LOW, data);
+		ppu->write_vram(memory_address - VRAM_LOW, data);
 	}
-	else if (memory_addr >= EXTERNAL_RAM_LOW && memory_addr <= EXTERNAL_RAM_HIGH)
+	else if (memory_address >= EXTERNAL_RAM_LOW && memory_address <= EXTERNAL_RAM_HIGH)
 	{
-		cartridge->write_ram(memory_addr, data);
+		cartridge->write_ram(memory_address - EXTERNAL_RAM_LOW, data);
 	}
-	else if (memory_addr >= WRAM_LOW_BANK_0 && memory_addr <= WRAM_HIGH_BANK_0)
+	else if (memory_address >= WRAM_LOW_BANK_0 && memory_address <= WRAM_HIGH_BANK_0)
 	{
-		wram[memory_addr - WRAM_LOW_BANK_0] = data;
+		wram[memory_address - WRAM_LOW_BANK_0] = data;
 	}
-	else if (memory_addr >= WRAM_LOW_BANK_1 && memory_addr <= WRAM_HIGH_BANK_1)
+	else if (memory_address >= WRAM_LOW_BANK_1 && memory_address <= WRAM_HIGH_BANK_1)
 	{
-		wram[memory_addr - WRAM_LOW_BANK_0] = data;
+		wram[memory_address - WRAM_LOW_BANK_0] = data;
 	}
-	else if (memory_addr >= ECHO_RAM_LOW && memory_addr <= ECHO_RAM_HIGH)
+	else if (memory_address >= ECHO_RAM_LOW && memory_address <= ECHO_RAM_HIGH)
 	{
-		wram[memory_addr - WRAM_LOW_BANK_0 - ECHO_RAM_LOW] = data;
+		wram[memory_address - WRAM_LOW_BANK_0 - ECHO_RAM_LOW] = data;
 	}
-	else if (memory_addr >= OAM_LOW && memory_addr <= OAM_HIGH)
+	else if (memory_address >= OAM_LOW && memory_address <= OAM_HIGH)
 	{
-		ppu->write_oam(memory_addr - OAM_LOW, data);
+		ppu->write_oam(memory_address - OAM_LOW, data);
 	}
-	else if (memory_addr >= UNUSED_LOW && memory_addr <= UNUSED_HIGH)
+	else if (memory_address >= UNUSED_LOW && memory_address <= UNUSED_HIGH)
 	{
 
 	}
-	else if (memory_addr == DIV)
+	else if (memory_address == DIV)
 	{
 		timers->reset_div();
 	}
-	else if (memory_addr == TIMA)
+	else if (memory_address == TIMA)
 	{
 		timers->write_tima(data);
 	}
-	else if (memory_addr == TAC)
+	else if (memory_address == TAC)
 	{
 		timers->write_timer_control(data);
 	}
-	else if (memory_addr == TMA)
+	else if (memory_address == TMA)
 	{
 		timers->write_tma(data);
 	}
-	else if (memory_addr == JOYPAD_INPUT)
+	else if (memory_address == JOYPAD_INPUT)
 	{
 		joypad->write_p1(data);
 	}
-	else if (memory_addr == SB)
+	else if (memory_address == SB)
 	{
 		serial_transfer_data = data;
 	}
-	else if (memory_addr == SC)
+	else if (memory_address == SC)
 	{
 		serial_transfer_control = data;
 
@@ -216,15 +246,15 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 		}
 #endif
 	}
-	else if (memory_addr == IF)
+	else if (memory_address == IF)
 	{
 		interrupt_flag = data;
 	}
-	else if (memory_addr >= AUDIO_IO_LOW && memory_addr <= AUDIO_IO_HIGH)
+	else if (memory_address >= AUDIO_IO_LOW && memory_address <= AUDIO_IO_HIGH)
 	{
 
 	}
-	else if (memory_addr >= WAVE_PATTERN_LOW && memory_addr <= WAVE_PATTERN_HIGH)
+	else if (memory_address >= WAVE_PATTERN_LOW && memory_address <= WAVE_PATTERN_HIGH)
 	{
 
 	}
@@ -232,19 +262,27 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 	//{
 	//	// delete this
 	//}
-	else if (memory_addr == LCD_LCDC)
+	else if (memory_address == LCD_LCDC)
 	{
 		ppu->write_lcdc(data);
 	}
-	else if (memory_addr == LCD_SCY)
+	else if (memory_address == LCD_STAT)
+	{
+		ppu->write_stat(data);
+	}
+	else if (memory_address == LCD_SCY)
 	{
 		ppu->write_scy(data);
 	}
-	else if (memory_addr == LCD_SCX)
+	else if (memory_address == LCD_SCX)
 	{
 		ppu->write_scx(data);
 	}
-	else if (memory_addr == OAM_DMA)
+	else if (memory_address == LCD_LYC)
+	{
+		ppu->write_lyc(data);
+	}
+	else if (memory_address == OAM_DMA)
 	{
 		uint16_t src_address = data << 8;
 		for (uint16_t i = 0; i <= OAM_HIGH - OAM_LOW; i++)
@@ -253,15 +291,35 @@ void BUS::write_memory(uint64_t memory_addr, uint8_t data)
 			ppu->write_oam(i, byte);
 		}
 	}
-	else if (memory_addr == DISABLE_BOOT_ROM)
+	else if (memory_address == LCD_BGP)
+	{
+		 ppu->write_bgp(data);
+	}
+	else if (memory_address == LCD_OBP0)
+	{
+		 ppu->write_obp0(data);
+    }
+	else if (memory_address == LCD_OBP1)
+	{
+		 ppu->write_obp1(data);
+	}
+	else if (memory_address == LCD_WY)
+	{
+		 ppu->write_wy(data);
+	}
+	else if (memory_address == LCD_WX)
+	{
+		 ppu->write_wx(data);
+	}
+	else if (memory_address == DISABLE_BOOT_ROM)
 	{
 		disable_boot_rom_flag = data;
 	}
-	else if (memory_addr >= HRAM_LOW && memory_addr <= HRAM_HIGH)
+	else if (memory_address >= HRAM_LOW && memory_address <= HRAM_HIGH)
 	{
-		hram[memory_addr - HRAM_LOW] = data;
+		hram[memory_address - HRAM_LOW] = data;
 	}
-	else if (memory_addr == IE)
+	else if (memory_address == IE)
 	{
 		interrupt_enable = data;;
 	}

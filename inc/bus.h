@@ -18,8 +18,8 @@ class BUS
 public:
 	BUS();
 	BUS(CARTRIDGE* cartridge, TIMERS* timers, PPU* ppu, JOYPAD* joypad);
-	uint8_t  read_memory(uint64_t memory_addr);
-	void     write_memory(uint64_t memory_addr, uint8_t data);
+	uint8_t  read_memory(uint64_t memory_address);
+	void     write_memory(uint64_t memory_address, uint8_t data);
 
 private:
 	 /*

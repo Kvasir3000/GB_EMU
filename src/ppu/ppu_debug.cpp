@@ -82,7 +82,7 @@ void PPU::render_tile_map_debug()
 			}
 			else
 			{
-				tile_address = TILE_DATA_BASE_0 - ((int8_t)tile_id * TILE_SIZE); // Check this
+				tile_address = TILE_DATA_BASE_0 + ((int8_t)tile_id * TILE_SIZE);
 			}
 			
 			TILE tile = sample_tile(tile_address);
@@ -104,6 +104,28 @@ void PPU::render_tile_map_debug()
 
 	render_viewport_debug();
 	SDL_RenderPresent(tile_map_renderer);
+}
+
+void PPU::render_tile(SDL_Renderer* renderer, uint16_t column, uint16_t row, uint16_t scaler, TILE tile)
+{
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		for (uint8_t j = 0; j < 8; j++)
+		{
+			// Get pixel value from left to right
+			uint8_t   pallete_id = (tile.decoded_data[i] & (PIXEL_MASK << (2 * j))) >> (2 * j);
+			uint8_t   pallete_offset = pallete_id * 2;
+			uint8_t   pallete = (bgp & (PIXEL_MASK << pallete_offset)) >> pallete_offset;
+			SDL_Color color = get_pallet_color(pallete);
+
+			uint8_t x = (column * 8) + 8 - j - 1;
+			uint16_t y = (row * 8) + i;
+
+			SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+			SDL_Rect rect = { x * scaler, y * scaler, scaler, scaler };
+			SDL_RenderFillRect(renderer, &rect);
+		}
+	}
 }
 
 // Only works for tile map 0

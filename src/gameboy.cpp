@@ -34,6 +34,10 @@ void GAMEBOY::request_interrupts()
     {
         request_vblank_interrupt();
     }
+    if (interrupts & REQUEST_LCD_INTERRUPT)
+    {
+       // request_lcd_interrupt();
+    }
     interrupts = 0;
 }
 
@@ -48,4 +52,10 @@ void GAMEBOY::request_vblank_interrupt()
 {
     uint8_t interrupt_flag = bus->read_memory(IF);
     bus->write_memory(IF, interrupt_flag | IF_VBLANK_MASK);
+}
+
+void GAMEBOY::request_lcd_interrupt()
+{
+    uint8_t interrupt_flag = bus->read_memory(IF);
+    bus->write_memory(IF, interrupt_flag | IF_LCD_MASK);
 }

@@ -1,8 +1,12 @@
 #pragma once 
 
-#define LCD_RESOLUTION_X               166
+#define LCD_RESOLUTION_X               160
 #define LCD_RESOLUTION_Y               144 
 #define LCD_RESOLUTION_SCALER          4
+
+#define LCD_OBJECT_Y_OFFSET            16
+#define LCD_OBJECT_X_OFFSET            8
+#define LCD_WINDOW_X_OFFSET            7
 
 #define TILE_DIMENSION                 8
 #define TILE_MAP_DIMENSION             32
@@ -24,8 +28,15 @@
 #define LCDC_BG_TILE_MAP               0b00001000 
 #define LCDC_BG_WINDOW_TILE_DATA       0b00010000 
 #define LCDC_WINDOW_ENABLE             0b00100000 
-#define LCDC_WINDOT_TILE_MAP           0b01000000
+#define LCDC_WINDOW_TILE_MAP           0b01000000
 #define LCDC_LCD_PPU_ENABLE            0b10000000
+
+#define LCD_STAT_PPU_MODE              0b00000011
+#define LCD_STAT_LYC_LY                0b00000100
+#define LCD_STAT_MODE_0                0b00001000
+#define LCD_STAT_MODE_1                0b00010000
+#define LCD_STAT_MODE_2                0b00100000
+#define LCD_STAT_LYX_SELECT            0b01000000
 
 
 #define WINDOW_TILE_MAP_BASE_0         0x9800
@@ -36,3 +47,13 @@
 #define TILE_DATA_BASE_1               0x8000
 
 #define PIXEL_MASK                     0b11
+
+#define OAM_ATTRIBUTES_CGB_PALLETE     0b00000111 // CGB only
+#define OAM_ATTRIBUTES_BANK            0b00001000 // CGB only
+#define OAM_ATTRIBUTES_DMG_PALLETE     0b00010000
+#define OAM_ATTRIBUTES_X_FLIP          0b00100000
+#define OAM_ATTRIBUTES_Y_FLIP          0b01000000 
+#define OAM_ATTRIBUTES_PRIORITY        0b10000000 
+
+#define TRANSPERENT_PIXEL              0
+

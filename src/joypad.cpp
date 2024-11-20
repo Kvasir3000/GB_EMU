@@ -22,7 +22,6 @@ void JOYPAD::read_input()
 {
     SDL_Event events;
 
-
     while (SDL_PollEvent(&events))
     {
         if (events.type == SDL_QUIT)
