@@ -3,6 +3,7 @@
 #include <map>
 
 #include "common/memory_map_defs.h"
+#include "common/interrupts_defs.h"''
 
 
 #define JOYPAD_A        0b00000001
@@ -21,8 +22,8 @@ class JOYPAD
 {
 public:
 	JOYPAD();
-	void read_input();
-	void write_p1(uint8_t data);
+	uint8_t read_input();
+	void    write_p1(uint8_t data);
 	uint8_t read_p1();
 private:
 	std::map<SDL_Keycode, uint16_t> select_buttons_map;

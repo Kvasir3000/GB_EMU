@@ -50,15 +50,6 @@ uint8_t PPU::tick(uint8_t elapsed_dots)
 	for (int i = 0; i < elapsed_dots; i++)
 	{
 		scanline_dots++;
-		if (lyc == current_line)
-		{
-			stat |= LCD_STAT_LYC_LY;
-			interrupt |= get_stat_interrupt(LCD_STAT_LYX_SELECT);
-		}
-		else
-		{
-			stat &= ~LCD_STAT_LYC_LY;
-		}
 		
 		if (current_mode == MODE_2_OAM_SCAN && scanline_dots >= MODE_2_OAM_SCAN_DOTS)
 		{
@@ -70,11 +61,21 @@ uint8_t PPU::tick(uint8_t elapsed_dots)
 			scanline_dots = 0;
 			current_mode = MODE_0_HORIZONTAL_BLANK;
 			interrupt |= get_stat_interrupt(LCD_STAT_MODE_0);
+			if (lyc == current_line)
+			{
+				stat |= LCD_STAT_LYC_LY;
+				interrupt |= get_stat_interrupt(LCD_STAT_LYX_SELECT);
+			}
+			else
+			{
+				stat &= ~LCD_STAT_LYC_LY;
+			}
 		}
 		else if (current_mode == MODE_0_HORIZONTAL_BLANK && scanline_dots >= MODE_0_HORIZONTAL_BLANK_DOTS)
 		{
 			scanline_dots = 0;
 			current_line++;
+
 			if (current_line == LCD_RESOLUTION_Y)
 			{
 				current_mode = MODE_1_VERTICAL_BLANK;
@@ -103,6 +104,7 @@ uint8_t PPU::tick(uint8_t elapsed_dots)
 			}
 		}
 	}
+	stat = ((stat & 0xF8) >> 2 << 2) | (current_mode);
 	return interrupt;
 }
 
@@ -113,95 +115,6 @@ uint8_t PPU::get_stat_interrupt(uint8_t condition)
 		return REQUEST_LCD_INTERRUPT;
 	}
 	return 0;
-}
-
-void PPU::scnaline_background()
-{
-	if (lcdc & LCDC_BG_WINDOW_ENABLE)
-	{
-		uint8_t scrolled_y = scy + current_line - 1;
-		uint16_t tile_map_base_address = (lcdc & LCDC_BG_TILE_MAP) ? BG_TILE_MAP_BASE_1 : BG_TILE_MAP_BASE_0;
-		fetch_tile_map_line(scrolled_y, tile_map_base_address);
-		fetch_tile_line();
-
-		uint8_t tile_row = scrolled_y - (scrolled_y / TILE_DIMENSION) * TILE_DIMENSION;
-	
-		for (uint8_t i = 0; i < LCD_RESOLUTION_X; i++)
-		{
-			uint8_t scrolled_x = scx + i;
-			uint8_t tile_id_x = scrolled_x / TILE_DIMENSION;
-			uint8_t tile_x_offset = scrolled_x - (tile_id_x * TILE_DIMENSION);
-
-			TILE     tile = tile_cache[tile_id_x];
-			uint16_t pixel_mask = (PIXEL_MASK << 14) >> (tile_x_offset * 2);
-			uint16_t bits_offset = ((14 - tile_x_offset * 2));
-			uint8_t  pallete_id = (tile.decoded_data[tile_row] & pixel_mask) >> bits_offset;
-			uint8_t  pallete_offset = pallete_id * 2;
-			uint8_t  pallete = (bgp & (PIXEL_MASK << pallete_offset)) >> pallete_offset;
-			frame_buffer[current_line - 1][i].color = get_pallet_color(pallete);
-			frame_buffer[current_line - 1][i].pallete_id = pallete_id;
-		}  
-	}
-}
-
-void PPU::scanline_window()
-{
-	if (lcdc & LCDC_BG_WINDOW_ENABLE && lcdc & LCDC_WINDOW_ENABLE)
-	{
-		if (current_line - 1 >= wy)
-		{
-			uint16_t tile_map_base_address = (lcdc & LCDC_WINDOW_TILE_MAP) ? WINDOW_TILE_MAP_BASE_1 : WINDOW_TILE_MAP_BASE_0;
-			fetch_tile_map_line(current_line - 1 - wy, tile_map_base_address);
-			fetch_tile_line();
-			uint8_t tile_row = current_line - 1 - ((current_line - 1) / TILE_DIMENSION) * TILE_DIMENSION;
-
-			for (uint8_t i = wx + LCD_WINDOW_X_OFFSET; i < LCD_RESOLUTION_X; i++)
-			{
-				uint8_t tile_id_x = (i - (wx + LCD_WINDOW_X_OFFSET)) / TILE_DIMENSION;
-				uint8_t tile_x_offset = (i - (wx + LCD_WINDOW_X_OFFSET)) - (tile_id_x * TILE_DIMENSION);
-
-				TILE     tile = tile_cache[tile_id_x];
-				uint16_t pixel_mask = (PIXEL_MASK << 14) >> (tile_x_offset * 2);
-				uint16_t bits_offset = ((14 - tile_x_offset * 2));
-				uint8_t  pallete_id = (tile.decoded_data[tile_row] & pixel_mask) >> bits_offset;
-				uint8_t  pallete_offset = pallete_id * 2;
-				uint8_t  pallete = (bgp & (PIXEL_MASK << pallete_offset)) >> pallete_offset;
-
-				frame_buffer[current_line - 1][i - LCD_WINDOW_X_OFFSET].color = get_pallet_color(pallete);
-				frame_buffer[current_line - 1][i - LCD_WINDOW_X_OFFSET].pallete_id = pallete_id;
-			}
-		}
-	}
-}
-
-void PPU::fetch_tile_map_line(uint8_t line, uint16_t tile_map_base_address)
-{
-	uint8_t tile_id_y = line / TILE_DIMENSION;
-	uint16_t tile_map_line_address = tile_map_base_address + (tile_id_y * TILE_MAP_DIMENSION);
-	for (uint8_t i = 0; i < TILE_MAP_DIMENSION; i++)
-	{
-		tile_map_cache[i] = vram[(tile_map_line_address + i) - VRAM_LOW];
-	}
-}
-
-void PPU::fetch_tile_line()
-{
-	uint16_t tile_address;
-	for (uint8_t i = 0; i < TILE_MAP_DIMENSION; i++)
-	{
-		if (lcdc & LCDC_BG_WINDOW_TILE_DATA)
-		{
-			tile_address = TILE_DATA_BASE_1 + (tile_map_cache[i] * TILE_SIZE);
-		}
-		else
-		{
-			tile_address = TILE_DATA_BASE_0 + ((int8_t)tile_map_cache[i] * TILE_SIZE);
-		}
-
-		TILE tile = sample_tile(tile_address);
-		decode_tile(tile);
-		tile_cache[i] = tile;
-	}
 }
 
 PPU::TILE PPU::sample_tile(uint16_t memory_address)
@@ -251,11 +164,10 @@ void PPU::render_frame_buffer()
 	{
 		for (uint16_t j = 0; j < LCD_RESOLUTION_X; j++)
 		{
-			SDL_Color color = frame_buffer[i][j].color; 
+			SDL_Color color = frame_buffer[i][j]; 
 			SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 			SDL_Rect rect = { j * LCD_RESOLUTION_SCALER, i * LCD_RESOLUTION_SCALER, LCD_RESOLUTION_SCALER, LCD_RESOLUTION_SCALER };
 			SDL_RenderFillRect(renderer, &rect);
-			frame_buffer[i][j] = { 0, 0, 0, 255 };
 		}
 	}
 	SDL_RenderPresent(renderer);
@@ -283,82 +195,6 @@ SDL_Color PPU::get_pallet_color(uint8_t pallete_id)
 	return color;
 }
 
-PPU::OBJECT_ATTRIBUTES PPU::sample_object(uint16_t memory_address)
-{
-	OBJECT_ATTRIBUTES object = { 0 };
-	object.y = oam[memory_address++];
-	object.x = oam[memory_address++];
-	object.tile_id = oam[memory_address++];
-	object.attributes = oam[memory_address++];
-
-	return object;
-}
-
-void PPU::select_objects()
-{
-	objects.clear();
-	for (uint16_t i = 0; i <= OAM_HIGH - OAM_LOW; i += 4)
-	{
-		OBJECT_ATTRIBUTES object = sample_object(i);
-		int16_t object_y = object.y - 16;
-		if (object_y >= 0 && object_y <= LCD_RESOLUTION_Y)
-		{
-			objects.push_back(object);
-		}
-	}
-}
-
-void PPU::sort_object_priority()
-{
-	std::sort(objects.begin(), objects.end(), [](OBJECT_ATTRIBUTES obj1, OBJECT_ATTRIBUTES obj2) { return (obj1.x > obj2.x); });
-}
-
-void PPU::draw_objects()
-{
-	select_objects();
-	sort_object_priority();
-	for (uint16_t i = 0; i < objects.size(); i++)
-	{
-		OBJECT_ATTRIBUTES object = objects[i];
-		uint16_t tile_addres = TILE_DATA_BASE_1 + (object.tile_id * TILE_SIZE);
-		TILE tile = sample_tile(tile_addres);
-		decode_tile(tile);
-		draw_object_tile(object, tile);
-		if (lcdc & LCDC_OBJ_SIZE)
-		{
-			tile_addres = TILE_DATA_BASE_1 + ((object.tile_id + 1) * TILE_SIZE);
-			tile = sample_tile(tile_addres);
-			decode_tile(tile);
-			object.y += 8;
-			draw_object_tile(object, tile);
-		}
-	}
-}
-
-void PPU::draw_object_tile(OBJECT_ATTRIBUTES object, TILE tile)
-{
-	for (uint8_t i = 0; i < TILE_DIMENSION; i++)
-	{
-		for (uint8_t j = 0; j < TILE_DIMENSION; j++)
-		{
-			int16_t x = object.x - LCD_OBJECT_X_OFFSET + i;
-			int16_t y = object.y - LCD_OBJECT_Y_OFFSET + j;
-			if (x >= 0 && x <= LCD_RESOLUTION_X && y >= 0 && y <= LCD_RESOLUTION_Y)
-			{
-				uint8_t tile_column = (object.attributes & OAM_ATTRIBUTES_X_FLIP)? (i * 2) : (14 - (i * 2));
-				uint8_t tile_row = (object.attributes & OAM_ATTRIBUTES_Y_FLIP)? TILE_DIMENSION - j - 1 : j;
-				uint8_t pallete_id = (tile.decoded_data[tile_row] & (PIXEL_MASK << tile_column)) >> tile_column;
-
-				if (pallete_id != TRANSPERENT_PIXEL)
-				{
-					uint8_t pallete_offset = pallete_id * 2;
-					uint8_t pallete = (((object.attributes & OAM_ATTRIBUTES_DMG_PALLETE) ? obp1 : obp0) & (PIXEL_MASK << pallete_offset)) >> pallete_offset;
-					frame_buffer[y][x].color = get_pallet_color(pallete);
-				}
-			}
-		}
-	}
-}
 
 uint8_t PPU::read_oam(uint16_t memory_address)
 {
@@ -447,7 +283,7 @@ uint8_t PPU::read_lyc()
 
 void PPU::write_stat(uint8_t data)
 {
-	stat = (data & 0xFE) | (stat & 0x3);
+	stat = (data & 0xF8) | (stat & 0x3);
 }
 
 uint8_t PPU::read_stat()

@@ -19,8 +19,8 @@ void GAMEBOY::run_emulation()
         elapsed_t_cycles = cpu->tick();
         interrupts |= timers.tick(elapsed_t_cycles);
         interrupts |= ppu->tick(elapsed_t_cycles);
+        interrupts |= joypad.read_input();
         request_interrupts();
-        joypad.read_input();
     }
 }
 
@@ -28,34 +28,26 @@ void GAMEBOY::request_interrupts()
 {
     if (interrupts & REQUEST_TIMER_INTERRUPT)
     {
-        request_timer_interrupt();
+        add_interrupt(IF_TIMER_MASK);
+        bus->write_memory(TIMA, bus->read_memory(TMA));
     }
     if (interrupts & REQUEST_VBLANK_INTERRUPT)
     {
-        request_vblank_interrupt();
+        add_interrupt(IF_VBLANK_MASK);
     }
     if (interrupts & REQUEST_LCD_INTERRUPT)
     {
-       // request_lcd_interrupt();
+        add_interrupt(IF_LCD_MASK);
+    }
+    if (interrupts & REQUEST_JOYPAD_INTERRUPT)
+    {
+        add_interrupt(IF_JOYPAD_MASK);
     }
     interrupts = 0;
 }
 
-void GAMEBOY::request_timer_interrupt()
+void GAMEBOY::add_interrupt(uint8_t interrupt_type)
 {
     uint8_t interrupt_flag = bus->read_memory(IF);
-    bus->write_memory(IF, interrupt_flag | IF_TIMER_MASK);
-    bus->write_memory(TIMA, bus->read_memory(TMA)); 
-}
-
-void GAMEBOY::request_vblank_interrupt()
-{
-    uint8_t interrupt_flag = bus->read_memory(IF);
-    bus->write_memory(IF, interrupt_flag | IF_VBLANK_MASK);
-}
-
-void GAMEBOY::request_lcd_interrupt()
-{
-    uint8_t interrupt_flag = bus->read_memory(IF);
-    bus->write_memory(IF, interrupt_flag | IF_LCD_MASK);
+    bus->write_memory(IF, interrupt_flag | interrupt_type);
 }

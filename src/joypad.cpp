@@ -18,10 +18,10 @@ JOYPAD::JOYPAD()
 
 }
 
-void JOYPAD::read_input()
+uint8_t JOYPAD::read_input()
 {
     SDL_Event events;
-
+    uint8_t interrupt = 0;
     while (SDL_PollEvent(&events))
     {
         if (events.type == SDL_QUIT)
@@ -30,6 +30,7 @@ void JOYPAD::read_input()
         }
         else if (events.type == SDL_KEYDOWN)
         {
+            interrupt = REQUEST_JOYPAD_INTERRUPT;
             SDL_Keycode key = events.key.keysym.sym;
             if ((p1 & JOYPAD_D_PAD) && d_pad_map[key])
             {
@@ -53,6 +54,7 @@ void JOYPAD::read_input()
             }
         }
     }
+    return interrupt;
 }
 
 void JOYPAD::write_p1(uint8_t data)

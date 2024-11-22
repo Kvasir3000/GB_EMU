@@ -74,12 +74,7 @@ private:
  	uint8_t    vram[VRAM_HIGH - VRAM_LOW + 1];
 	uint8_t    oam[OAM_HIGH - OAM_LOW + 1];
 	
-	struct FRAME_BUFFER
-	{
-		SDL_Color color;
-		uint8_t   pallete_id;
-	};
-	FRAME_BUFFER frame_buffer[LCD_RESOLUTION_Y][LCD_RESOLUTION_X];
+	SDL_Color frame_buffer[LCD_RESOLUTION_Y][LCD_RESOLUTION_X];
 
 	struct TILE
 	{
@@ -98,10 +93,11 @@ private:
 	std::chrono::milliseconds frame_duration;
 	std::chrono::high_resolution_clock::time_point last_frame_time;
 	void render_frame();
-	void scnaline_background();
+
 	void fetch_tile_map_line(uint8_t y_tile_map, uint16_t tile_map_base_address);
 	void fetch_tile_line();
-
+	uint8_t get_pallete(uint8_t tile_id_x, uint8_t tile_x_offset, uint8_t tile_row);
+	void scnaline_background();
 	void scanline_window();
 
 	struct OBJECT_ATTRIBUTES

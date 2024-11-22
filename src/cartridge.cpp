@@ -108,7 +108,7 @@ void CARTRIDGE::write_rom(uint16_t memory_address, uint8_t data)
 
 uint8_t CARTRIDGE::read_ram(uint16_t memory_address)
 {
-    if (ram_enable)
+    if (ram_enable && ram_banks.size())
     {
         return ram_banks[ram_bank_idx][memory_address];
     }
@@ -120,7 +120,7 @@ uint8_t CARTRIDGE::read_ram(uint16_t memory_address)
 
 void CARTRIDGE::write_ram(uint16_t memory_address, uint8_t data)
 {
-    if (ram_enable)
+    if (ram_enable && ram_banks.size())
     {
         ram_banks[ram_bank_idx][memory_address] = data;
     }

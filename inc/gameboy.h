@@ -31,9 +31,11 @@ private:
 
 	
 	void request_interrupts();
+	void add_interrupt(uint8_t interrupt_type);
 	void request_timer_interrupt();
 	void request_vblank_interrupt();
 	void request_lcd_interrupt();
+	void request_joypad_interrupt();
 	uint8_t interrupts;
 
 	uint8_t elapsed_t_cycles;

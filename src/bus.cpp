@@ -25,12 +25,10 @@ uint8_t BUS::read_memory(uint64_t memory_address)
 {
 	if (memory_address >= ROM_BANK_00_LOW && memory_address <= ROM_BANK_00_HIGH)
 	{
-		//return cartridge->read_rom(memory_addr);
 		return cartridge->read_rom_bank0(memory_address);
 	}
 	else if (memory_address >= ROM_BANK_NN_LOW && memory_address <= ROM_BANK_NN_HIGH)
 	{
-		//return cartridge->read_rom(memory_addr);
 		return cartridge->read_rom_bank_nn(memory_address - ROM_BANK_NN_LOW);
 	}
 	else if (memory_address >= VRAM_LOW && memory_address <= VRAM_HIGH)
@@ -111,7 +109,7 @@ uint8_t BUS::read_memory(uint64_t memory_address)
 	}
 	else if (memory_address == LCD_STAT)
 	{
-		//return ppu->read_stat();
+		return ppu->read_stat();
 	}
 	else if (memory_address == LCD_SCY)
 	{

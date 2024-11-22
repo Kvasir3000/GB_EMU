@@ -17,7 +17,9 @@ set( SOURCES
 	src/cpu/cb_opcodes.cpp
         src/cpu/cpu_misc.cpp
         src/ppu/ppu.cpp
+        src/ppu/ppu_scanline.cpp
         src/ppu/ppu_debug.cpp
+        src/ppu/ppu_objects.cpp
 	src/bus.cpp
 	src/joypad.cpp
 	src/timers.cpp
