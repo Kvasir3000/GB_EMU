@@ -6,6 +6,11 @@
 #include <chrono>
 #include <SDL.h>
 #include <thread>
+#if defined WIN32
+#include <windows.h>
+#else
+#include <cstdlib>
+#endif
 
 #include "bus.h"
 #include "timers.h"
@@ -18,9 +23,11 @@
 class GAMEBOY
 {
 public:
-	GAMEBOY(std::string rom_path);
+	GAMEBOY();
 	void run_emulation();
 private: 
+
+	bool       run_emulator;
 
 	BUS*       bus;
 	CPU*       cpu;
@@ -29,7 +36,9 @@ private:
 	JOYPAD     joypad;
 	CARTRIDGE* cartridge;
 
-	
+	std::string rom_path;
+	void get_rom_file();
+
 	void request_interrupts();
 	void add_interrupt(uint8_t interrupt_type);
 	void request_timer_interrupt();

@@ -9,6 +9,7 @@ CARTRIDGE::CARTRIDGE()
 CARTRIDGE::CARTRIDGE(std::string rom_path)
 {
     read_program(rom_path);
+    //read_save(rom_path);
    
     init_memory_banks(rom_banks, 2 << program_data[ROM_SIZE_ADDR], ROM_BANK_SIZE_KIB);
 
@@ -17,20 +18,11 @@ CARTRIDGE::CARTRIDGE(std::string rom_path)
     init_memory_banks(ram_banks, banks[program_data[RAM_SIZE_ADDR]], RAM_BANK_SIZE_KIB);
     
     fill_rom();
+    //fill_ram();
+
 
     ram_bank_idx = 0;
     rom_bank_idx = 1;
-    //std::vector<uint8_t>ram_bank1(0x2000);
-    //ram_banks.emplace_back(ram_bank1);
-}
-
-CARTRIDGE::CARTRIDGE(std::string rom_path, std::vector<uint8_t> program_data)
-{
-    read_program(rom_path);
-    ram_bank_idx = 0;
-    rom_bank_idx = 0; 
-    std::vector<uint8_t>ram_bank1(0x2000);
-    ram_banks.emplace_back(ram_bank1);
 }
 
 void CARTRIDGE::read_program(std::string rom_path)
@@ -49,6 +41,47 @@ void CARTRIDGE::read_program(std::string rom_path)
     {
         std::cout << "Unable to open file: " << rom_path << "\n";
     }
+}
+
+void CARTRIDGE::read_save(std::string rom_path)
+{
+#if defined _WIN32
+    std::string save_path = rom_path;
+    save_path.pop_back();
+    save_path.pop_back();
+    save_path.push_back('s');
+    save_path.push_back('a');
+    save_path.push_back('v');
+    std::cout << save_path << "\n";
+    save_file = std::fstream(save_path, std::ios::binary | std::ios::out  | std::ios::in);
+    if (save_file.is_open())
+    {
+        save_file.seekg(0, std::ifstream::end);
+        std::streamsize program_size = save_file.tellg();
+        save_file.seekg(0, std::ifstream::beg);
+        save_data = std::vector<uint8_t>(program_size);
+        save_file.read((char*)save_data.data(), program_size);
+    }
+    else
+    {
+        save_file.open(save_path, std::ios::binary | std::ios::out);
+        std::cout << "Unable to open file: " << save_path << "\n";
+    }
+
+   
+#else
+    std::cout << "Open files for Linux system is not written yet\n";
+#endif
+}
+
+void CARTRIDGE::save()
+{
+    for (uint16_t i = 0; i < ram_banks.size(); i++)
+    {
+        save_file.write((char*)(&ram_banks[i]), sizeof(uint8_t) * RAM_BANK_SIZE_KIB);
+    }
+
+    save_file.close();
 }
 
 void CARTRIDGE::init_memory_banks(std::vector<std::vector<uint8_t>>& memory_bank, uint8_t number_of_banks, uint16_t bank_size)
@@ -72,6 +105,20 @@ void CARTRIDGE::fill_rom()
         rom_banks[bank][i % ROM_BANK_SIZE_KIB] = program_data[i];
     }
     program_data.clear();
+}
+
+void CARTRIDGE::fill_ram()
+{
+    uint16_t bank = 0;
+    for (uint64_t i = 0; i < save_data.size(); i++)
+    {
+        if ((i % RAM_BANK_SIZE_KIB == 0) && i != 0)
+        {
+            bank++;
+        }
+        ram_banks[bank][i % RAM_BANK_SIZE_KIB] = save_data[i];
+    }
+    save_data.clear();
 }
 
 
