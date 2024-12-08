@@ -22,9 +22,10 @@ class JOYPAD
 {
 public:
 	JOYPAD();
-	uint8_t read_input();
+	uint8_t read_input(bool& run_emulator);
 	void    write_p1(uint8_t data);
 	uint8_t read_p1();
+	bool debug = false;
 private:
 	std::map<SDL_Keycode, uint16_t> select_buttons_map;
 	std::map<SDL_Keycode, uint16_t> d_pad_map;

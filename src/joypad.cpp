@@ -18,7 +18,7 @@ JOYPAD::JOYPAD()
 
 }
 
-uint8_t JOYPAD::read_input()
+uint8_t JOYPAD::read_input(bool& run_emulator)
 {
     SDL_Event events;
     uint8_t interrupt = 0;
@@ -26,7 +26,7 @@ uint8_t JOYPAD::read_input()
     {
         if (events.type == SDL_QUIT)
         {
-
+            run_emulator = false;
         }
         else if (events.type == SDL_KEYDOWN)
         {
@@ -53,6 +53,10 @@ uint8_t JOYPAD::read_input()
                 buttons |= select_buttons_map[key];
             }
         }
+    }
+    if (debug)
+    {
+        d_pad = JOYPAD_DOWN;
     }
     return interrupt;
 }
