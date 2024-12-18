@@ -37,12 +37,14 @@ void GAMEBOY::get_rom_file()
         std::cout << "Selected file: " << rom_path << "\n";
     }
 #else
-    FIILE* fp = popen("zenity --file-selection --title=\"Select a file\"", "r");
+    FILE* fp = popen("zenity --file-selection --title=\"Select a file\"", "r");
     if (fp)
     {
-        if (fgets(rom_path.c_str(), rom_path.size(), fp) != NULL)
+        char* p = (char*)rom_path.data();
+        if (fgets((char*)rom_path.c_str(), rom_path.size(), fp) != NULL)
         {
-            rom_path[rom_path.size() - 1] = 0;
+            size_t path_size = rom_path.find_last_of("b");
+            rom_path.resize(path_size + 1);
             std::cout << "Selected file: " << rom_path << "\n";
         }
         pclose(fp);
