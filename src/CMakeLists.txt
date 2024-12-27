@@ -1,12 +1,4 @@
-cmake_minimum_required(VERSION 3.21) 
-#find_package(SDL2 2.30.8 REQUIRED)
-# Project name  and version 
-project(GB_EMU VERSION 1.0)
 
-#target_link_libraries(GB_EMU SDL2::SDL2 SDL2::SDL2main)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STADARD_REQUIRED True)
 
 set( SOURCES
 	src/main.cpp
@@ -20,8 +12,6 @@ set( SOURCES
         src/ppu/ppu_scanline.cpp
         src/ppu/ppu_debug.cpp
         src/ppu/ppu_objects.cpp
-	src/ppu/gl_renderer.cpp
-        src/ppu/sdl_renderer.cpp
 	src/bus.cpp
 	src/joypad.cpp
 	src/timers.cpp
